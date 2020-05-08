@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-18-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-18-0 http://www.eiffel.com/developers/xml/configuration-1-18-0.xsd" name="jj_vision" uuid="05FBD1A9-3ED5-4BB2-8507-ABC8AE2867AC" library_target="jj_vision">
+	<target name="jj_vision">
+		<root all_classes="true"/>
+		<option  void_safety="all" full_class_checking="false" is_attached_by_default="true" is_obsolete_routine_type="true" syntax="standard" manifest_array_type="mismatch_warning">
+		</option>
+		<capability>
+			<catcall_detection support="none"/>
+			<concurrency support="none"/>
+			<void_safety support="all" use="all"/>
+		</capability>
+		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf"/>
+		<library name="jj_temporal" location="$JJ_GITHUB\jj_temporal\jj_temporal.ecf"/>
+		<library name="vision2" location="$ISE_LIBRARY\library\vision2\vision2-safe.ecf"/>
+		<cluster name="jj_vision" location=".\" recursive="true">
+			<file_rule>
+				<exclude>/.svn$</exclude>
+				<exclude>/.git$</exclude>
+				<exclude>/tests$</exclude>
+				<exclude>/unfinished$</exclude>
+			</file_rule>
+		</cluster>
+	</target>
+</system>

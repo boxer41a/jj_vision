@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-18-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-18-0 http://www.eiffel.com/developers/xml/configuration-1-18-0.xsd" name="jj_vision_tester" uuid="D018D768-B06C-4770-8A27-0AF374F698DF">
+	<target name="jj_vision_tester">
+		<root class="JJ_VISION_TESTER" feature="make_and_launch"/>
+		<option full_class_checking="false" is_attached_by_default="true" is_obsolete_routine_type="true" syntax="standard" manifest_array_type="mismatch_warning">
+			<assertions precondition="true"/>
+		</option>
+		<capability>
+			<concurrency support="none"/>
+			<void_safety use="all"/>
+		</capability>
+		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf">
+			<option>
+				<assertions precondition="true"/>
+			</option>
+		</library>
+		<library name="jj_temporal" location="$JJ_GITHUB\jj_temporal\jj_temporal.ecf" readonly="false">
+			<option>
+				<assertions precondition="true"/>
+			</option>
+		</library>
+		<library name="jj_vision" location="..\jj_vision.ecf" readonly="false">
+			<option>
+				<assertions precondition="true"/>
+			</option>
+		</library>
+		<library name="vision2" location="$ISE_LIBRARY\library\vision2\vision2-safe.ecf">
+			<option>
+				<assertions precondition="true"/>
+			</option>
+		</library>
+		<library name="wel" location="$ISE_LIBRARY\library\wel\wel-safe.ecf"/>
+		<cluster name="bitmaps" location="$JJ_SOURCE\jj_bitmaps\classes\" recursive="true"/>
+		<cluster name="tests" location=".\" recursive="true">
+			<file_rule>
+				<exclude>/.git$</exclude>
+				<exclude>/.svn$</exclude>
+				<exclude>/CVS$</exclude>
+				<exclude>/EIFGENs$</exclude>
+			</file_rule>
+		</cluster>
+	</target>
+</system>
