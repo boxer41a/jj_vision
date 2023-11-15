@@ -167,7 +167,7 @@ feature {NONE} -- Implementation
 
 feature {NONE} -- Implementation
 
-	start_timeout (a_procedure: PROCEDURE [ANY, TUPLE])
+	start_timeout (a_procedure: PROCEDURE)
 			-- Calls `a_procedure' once and then sets up `timeout' to
 			-- execute `a_procedure' repeatedly.
 		require

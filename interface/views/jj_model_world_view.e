@@ -16,7 +16,7 @@ inherit
 
 	VIEW
 		redefine
-			default_create,
+--			default_create,
 			create_interface_objects,
 			draw
 		end
@@ -50,9 +50,11 @@ feature {NONE} -- Initialization
 		end
 
 	create_interface_objects
-			-- Create objects to be used by `Current' in `initialize'
+			-- Create objects to be used by `Current' in `initialize'.
+			-- Called by `defult_create'.
 			-- Implemented by descendants to create attached objects
-			-- in order to adhere to void-safety due to the implementation bridge pattern.
+			-- in order to adhere to void-safety due to the implementation
+			--   bridge pattern.
 		do
 			Precursor {VIEW}
 			Precursor {EV_MODEL_WORLD}

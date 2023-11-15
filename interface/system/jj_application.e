@@ -37,7 +37,21 @@ feature {NONE} -- Initialization
 
 	make_and_launch
 			-- Initialize and launch application
+--		local
+--			l_app: EV_APPLICATION
 		do
+--				-- The use of `l_app' instead of inheritance is the style
+--				-- used by the wizard in version 23.09.
+--			create l_app
+--			prepare
+--				-- The next instruction launches GUI message processing.
+--				-- It should be the last instruction of a creation procedure
+--				-- that initializes GUI objects. Any other processing should
+--				-- be done either by agents associated with GUI elements
+--				-- or in a separate processor.
+--			l_app.launch
+--				-- No code should appear here,
+--				-- otherwise GUI message processing will be stuck in SCOOP mode.
 			default_create
 			prepare
 			launch

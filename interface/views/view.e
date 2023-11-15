@@ -73,7 +73,7 @@ feature {NONE} -- Initialization
 			-- Add any actions to Current.
 			-- Called by `initialize'.
 		require
-			view_not_initialized: not is_view_initialized
+--			view_not_initialized: not is_view_initialized
 		do
 			is_view_initialized := True
 		end

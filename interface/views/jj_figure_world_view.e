@@ -27,6 +27,8 @@ class
 inherit
 
 	EV_FRAME
+		undefine
+			is_in_default_state
 		redefine
 			create_interface_objects,
 			initialize

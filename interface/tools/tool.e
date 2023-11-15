@@ -119,7 +119,7 @@ feature {NONE} -- Initialization
 			create title_bar
 			create tool_bar
 			create history_tool_bar
-			create user_text
+--			create user_text
 			create resize_tool_bar
 			create tool_name_label
 			create target_label
@@ -163,7 +163,6 @@ feature {NONE} -- Initialization
 				-- Create the toolbar
 			build_tool_bars
 			build_title_bar
---			set_actions
 				-- To get the tool bar look I used small 16x16 pixel icons.
 				-- The `title_bar' is an EV_HORIZONTAL_BOX which contains several
 				-- widets.  These are a EV_LABLE, an EV_TOOL_BAR, another label
@@ -180,21 +179,26 @@ feature {NONE} -- Initialization
 			set_minimum_height (100)
 --			set_view (Default_view)
 --			set_button_states
+				-- No, do not call `add_actions'; it is already called
+				-- from {VIEW}.`initialize' throught {SPLIT_VIEW}
+--			add_actions
 		end
 
 	build_title_bar
 			-- Create the small title bar at top of tool
+		local
+			lab: EV_LABEL
 		do
 				-- Add the name of tool to the title bar
-			tool_name_label.set_text (generating_type)
+			tool_name_label.set_text (generating_type.name)
 			title_bar.extend (tool_name_label)
 			title_bar.disable_item_expand (tool_name_label)
 				-- Add the forth and back buttons (in `history_tool_bar')
 			title_bar.extend (history_tool_bar)
 			title_bar.disable_item_expand (history_tool_bar)
 				-- Add a title to the tool
-			title_bar.extend (target_label)
-			title_bar.disable_item_expand (target_label)
+--			title_bar.extend (target_label)
+--			title_bar.disable_item_expand (target_label)
 				-- Add a history list combo box
 --			history_combo.disable_edit
 --			title_bar.extend (history_combo)	-- see "fix me" comment before `update_history_combo' feature
@@ -202,12 +206,14 @@ feature {NONE} -- Initialization
 				-- allow for `minimum_height' of the box.
 				-- Add the tool bar (to be used in descendants
 			title_bar.extend (tool_bar)
+			title_bar.disable_item_expand (tool_bar)
+				-- Put in a spacer to move the mode buttons to right
+			create lab.make_with_text ("         ")
+			title_bar.extend (lab)
+			title_bar.disable_item_expand (lab)
 				-- Add the `bar' from `view_manager' here
 			title_bar.extend (split_manager.bar)
-			title_bar.disable_item_expand (split_manager.bar)
-				-- Put in a spacer which can expand to force resize buttons to right
-			create user_text.make_with_text ("   ")
-			title_bar.extend (user_text)
+--			title_bar.disable_item_expand (split_manager.bar)
 				-- Add the maximize/minimize and hide buttons (in `resize_tool_bar')
 			title_bar.extend (resize_tool_bar)
 			title_bar.disable_item_expand (resize_tool_bar)
@@ -215,10 +221,15 @@ feature {NONE} -- Initialization
 
 	build_tool_bars
 			-- Create the tool bar.
+		local
+			vs: EV_VERTICAL_SEPARATOR
 		do
-			tool_bar.extend (create {EV_TOOL_BAR_SEPARATOR})
 			history_tool_bar.extend (back_button)
 			history_tool_bar.extend (forth_button)
+			history_tool_bar.extend (target_label)
+--			create vs
+--			history_tool_bar.extend (vs)
+--			history_tool_bar.disable_item_expand (vs)
 			resize_tool_bar.extend (size_button)
 			resize_tool_bar.extend (close_button)
 		end
@@ -248,7 +259,7 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	tool_bar: EV_TOOL_BAR
+	tool_bar: EV_HORIZONTAL_BOX		--EV_TOOL_BAR
 			-- Available for adding new buttons in descendants.
 
 	state: TOOL_STATE
@@ -270,7 +281,7 @@ feature -- Element change
 --				tool_label.set_accept_cursor (a_viewable.accept_cursor)
 --				tool_label.set_deny_cursor (a_viewable.deny_cursor)
 				update_history
---				draw
+				draw
 			end
 		end
 
@@ -299,11 +310,11 @@ feature {SPLIT_MANAGER, HISTORY_DROPDOWN} -- Access
 
 feature -- Element change
 
-	set_user_text (a_text: STRING_8)
-			-- Change the `user_text' that is displayed in the title bar.
-		do
-			user_text.set_text (a_text)
-		end
+--	set_user_text (a_text: STRING_8)
+--			-- Change the `user_text' that is displayed in the title bar.
+--		do
+--			user_text.set_text (a_text)
+--		end
 
 feature -- Status report
 
@@ -340,14 +351,14 @@ feature -- Status setting
 			-- Make the `history_tool_bar' visible
 		do
 			history_tool_bar.show
-			target_label.show
+--			target_label.show
 		end
 
 	disable_history
-			-- Make the `history_tool_bar' visible
+			-- Make the `history_tool_bar' NOT visible
 		do
 			history_tool_bar.hide
-			target_label.hide
+--			target_label.hide
 		end
 
 feature -- Basic operations
@@ -594,6 +605,8 @@ feature {NONE} -- Implementation
 				end
 				history_dropdown.start
 				history_dropdown.search (v)
+					-- Display a string describing the target
+				target_label.set_text (v.target.generating_type.name + " " + v.time_stamp.as_string)
 				check
 					not_off: not history_dropdown.is_off	-- because just inserted it
 				end
@@ -664,21 +677,21 @@ feature {NONE} -- Implementation
 	title_bar: EV_HORIZONTAL_BOX
 			-- Holds the name of tool, `history_tool_bar', and `resize_tool_bar'.
 
-	history_tool_bar: EV_TOOL_BAR
+	history_tool_bar: EV_HORIZONTAL_BOX	--EV_TOOL_BAR
 			-- The toolbar with the forth, back and posibly history buttons.
 
-	user_text: EV_LABEL
-			-- Text settable by `set_user_text'
+--	user_text: EV_LABEL
+--			-- Text settable by `set_user_text'
 
 	resize_tool_bar: EV_TOOL_BAR
 			-- Tool bar to hold resize and close buttons
 
 feature {NONE} -- Implementation
 
-	forth_button: EV_TOOL_BAR_BUTTON
+	forth_button: EV_BUTTON	--EV_TOOL_BAR_BUTTON
 			-- Button containing go back icon
 
-	back_button: EV_TOOL_BAR_BUTTON
+	back_button: EV_BUTTON	--EV_TOOL_BAR_BUTTON
 			-- Button containing go forth icon
 
 	size_button: EV_TOOL_BAR_BUTTON

@@ -363,20 +363,20 @@ feature {NONE} -- Implementation
 
 feature {NONE} -- Implementation (buttons)
 
-	edit_schema_toggle_button: EV_TOOL_BAR_TOGGLE_BUTTON
+	edit_schema_toggle_button: EV_TOGGLE_BUTTON  --EV_TOOL_BAR_TOGGLE_BUTTON
 			-- Toggles between normal mode and a mode allowing
 			-- editting of the `schema' from `record'.
 
 	schema_label: EV_LABEL
 			-- Shows the `id' or name of the schema currently in use.
 
-	align_fields_button: EV_TOOL_BAR_BUTTON
+	align_fields_button: EV_BUTTON  --EV_TOOL_BAR_BUTTON
 			-- Aligns a group of fields
 
-	delete_field_button: EV_TOOL_BAR_BUTTON
+	delete_field_button: EV_BUTTON  --EV_TOOL_BAR_BUTTON
 			-- Deletes the selected field(s) from the `schema' of `record'
 
-	new_field_button: EV_TOOL_BAR_BUTTON
+	new_field_button: EV_BUTTON --EV_TOOL_BAR_BUTTON
 			-- Pulls down a menu for creating a new field
 
 	new_field_menu: EV_MENU

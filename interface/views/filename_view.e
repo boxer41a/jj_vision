@@ -18,10 +18,11 @@ inherit
 	EV_VERTICAL_BOX
 		rename
 			object_id as ise_object_id
+		undefine
+			is_in_default_state
 		redefine
 			create_interface_objects,
-			initialize,
-			is_in_default_state
+			initialize
 		end
 
 	VIEW
@@ -71,14 +72,6 @@ feature {NONE} -- Initialization
 		do
 			browse_button.select_actions.extend (agent on_browse_button_pressed)
 			directory_text.change_actions.extend (agent on_directory_text_changed)
-		end
-
-feature {NONE} -- Contract support
-
-	is_in_default_state: BOOLEAN
-			-- Is `Current' in its default state?
-		do
-			Result := True
 		end
 
 feature {NONE} -- Actions

@@ -94,8 +94,15 @@ feature -- Access
 
 	scrollable_area: EDITOR_SCROLL_AREA
 
-	schema: detachable SCHEMA
+	schema: SCHEMA
 			-- Current schema in use by the editor.
+		require
+			has_schema: has_schema
+		do
+			check attached schema_imp as s then
+				Result := s
+			end
+		end
 
 	save_actions: EV_NOTIFY_ACTION_SEQUENCE
 			-- Actions to be performed after the record is saved.
@@ -120,16 +127,12 @@ feature -- Element change
 			-- in this view) and removes the old schema (if it had one) from
 			-- the `object_set'.
 			-- Also, removes old/add new fields contained in `a_schema'.
-		require
-			schema_exists: a_schema /= Void
 		do
 				-- Save the old `record'
-			if a_schema /= schema then
-				if attached schema as s then
-					target_set.prune (s)
-					schema := a_schema
-					target_set.extend (s)
-				end
+			if attached schema_imp as s and then s /= a_schema then
+				target_set.prune (s)
+				schema_imp := a_schema
+				target_set.extend (s)
 				draw
 			end
 		ensure
@@ -182,6 +185,12 @@ feature -- Status report
 			-- saved to `record'?  In other words, is `record'
 			-- updated anytime a change is made, or must it
 			-- be done manually with a call to `save_record'?
+
+	has_schema: BOOLEAN
+			-- Is a `schema' assigned to Current?
+		do
+			Result := attached schema_imp
+		end
 
 feature -- Status setting
 
@@ -415,6 +424,8 @@ feature {NONE} -- Implementation
 	record_imp: detachable EDITABLE
 			-- Detachable implementation of `target' for void-safety
 
+	schema_imp: detachable like schema
+			-- Detachable implementation of `schema'
 
 feature {NONE} -- Inaplicable
 

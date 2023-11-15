@@ -15,6 +15,8 @@ class
 inherit
 
 	EV_DRAWING_AREA
+		undefine
+			is_in_default_state
 		redefine
 			create_interface_objects,
 			initialize

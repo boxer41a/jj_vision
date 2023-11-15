@@ -116,7 +116,7 @@ feature -- Querry
 
 feature -- Comparison
 
-	infix "<" (a_other: like Current): BOOLEAN
+	is_less alias "<" (a_other: like Current): BOOLEAN
 			-- Is Current less than `a_other'?
 		do
 			Result := (time_stamp < a_other.time_stamp)

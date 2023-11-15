@@ -28,6 +28,8 @@ inherit
 		end
 
 	EV_SCROLLABLE_AREA
+		undefine
+			is_in_default_state
 		redefine
 			create_interface_objects,
 			initialize

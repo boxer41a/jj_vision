@@ -16,7 +16,6 @@ inherit
 
 	COMPARABLE_FIELD
 		redefine
-			Type,
 			is_valid_data,
 			string_to_type,
 			type_to_string

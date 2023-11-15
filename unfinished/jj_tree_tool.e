@@ -209,7 +209,7 @@ feature {NONE} -- Implementation (actions)
 			set_button_states
 		end
 
-	on_new_node_button_pressed (a_function: FUNCTION [JJ_TREE_TOOL, TUPLE, NODE])
+	on_new_node_button_pressed (a_function: FUNCTION [NODE])
 			-- React to a press of the `new_node_button' by creating a
 			-- new node using `a_function' and make the new node a child
 			-- under the currently selected node.

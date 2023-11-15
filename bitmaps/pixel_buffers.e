@@ -45,6 +45,9 @@ feature -- Access
 	icon_reset_diagram_color_buffer: ICON_RESET_DIAGRAM_COLOR  once create Result.make end
 	icon_check_exports_color_buffer: ICON_CHECK_EXPORTS_COLOR  once create Result.make end
 
+	Icon_bparrow_color_buffer: ICON_BPARROW_COLOR  once create Result.make end
+	Icon_client_link_buffer: CLIENTLNK  once create Result.make end
 
-
+	icon_auto_slice_limits_color_buffer: ICON_AUTO_SLICE_LIMITS_COLOR  once create Result.make end
+	icon_format_exporteds_color_buffer: ICON_FORMAT_EXPORTEDS_COLOR  once create Result.make end
 end

@@ -18,7 +18,6 @@ inherit
 	COMPARABLE_FIELD
 		redefine
 			default_create,
-			type,
 			is_valid_data,
 			string_to_type
 		end

@@ -849,7 +849,7 @@ feature {NONE} -- Implementation (Basic operations)
 				syncronize_tools
 					-- Make sure the radio items and buttons for the `selected_node' are set to
 					-- the correct state.  This must be called after the radio buttons are added
-					-- the the bar because the radio buttons for all the views must work together
+					-- to the bar because the radio buttons for all the views must work together
 					-- (when one selected the other turn off.)
 				restore_split_positions
 --				syncronize_view_selection_items
@@ -1121,7 +1121,8 @@ feature {NONE} -- Implementation (Basic operations)
 					menu.extend (toggle_menu)
 				end
 			end
-			if visible_count >= 2 then
+--			if visible_count >= 2 then
+			if view_count >= 2 then
 				toggle_bar.enable_sensitive
 				mode_menu.enable_sensitive
 				radio_menu.enable_sensitive
@@ -1281,7 +1282,7 @@ feature {NONE} -- Implementation (tool bars and buttons)
 			-- Used internally to build `cell' when `notebook_mode_button' is selected.
 
 	mode_bar: EV_TOOL_BAR
-			-- Holds the view mode buttons ('build_mode_button', 'single_mode_button',
+			-- Holds the view mode buttons (`single_mode_button',
 			-- `normal_mode_button', and `notebook_mode_button'.
 
 	toggle_bar: EV_TOOL_BAR

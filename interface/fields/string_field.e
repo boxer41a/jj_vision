@@ -15,9 +15,6 @@ class STRING_FIELD
 inherit
 
 	COMPARABLE_FIELD
-		redefine
-			type
-		end
 
 create
 	default_create

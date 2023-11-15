@@ -75,8 +75,6 @@ inherit
 		end
 
 	EDITABLE
-		undefine
-			is_equal
 		redefine
 			default_create,
 			copy,

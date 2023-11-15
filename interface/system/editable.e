@@ -193,7 +193,7 @@ feature -- Query
 
 feature -- Comparison
 
-	infix "<" (a_other: like Current): BOOLEAN
+	is_less alias "<" (a_other: like Current): BOOLEAN
 			-- Is Current less than `a_other'?
 			-- This uses the `keys' from `schema' first and then the `id'.
 		do

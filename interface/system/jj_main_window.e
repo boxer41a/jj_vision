@@ -62,8 +62,6 @@ feature {NONE} -- Initialization
 			-- Implemented by descendants to create attached objects
 			-- in order to adhere to void-safety due to the implementation bridge pattern.
 		do
-			Precursor {SPLIT_VIEW}
-			Precursor {EV_TITLED_WINDOW}
 				-- Create the "File" menu
 			create file_menu
 			create file_new_target_item
@@ -101,48 +99,13 @@ feature {NONE} -- Initialization
 			create minimize_all_button
 			create raise_all_button
 			create help_button
-				-- Create the status bar.
-			create jj_status_bar
-			create jj_status_label.make_with_text ("Add your status text here...")
+--				-- Create the status bar.
+--			create jj_status_bar
+--			create jj_status_label
 				-- Create the dialogs
 			create preferences_dialog
-				-- Add attributes to menu items
-			file_menu.set_text ("File")
-			file_new_target_item.set_text ("New target")
-			file_save_item.set_text ("Save")
-			file_open_item.set_text ("Open")
-			file_exit_item.set_text ("Exit")
-			edit_menu.set_text ("Edit")
-			edit_undo_item.set_text ("Undo")
-			edit_redo_item.set_text ("Redo")
-			tool_menu.set_text ("Tool")
-			tool_preferences_item.set_text ("Preferences")
-			window_menu.set_text ("Window")
-			window_new_item.set_text ("New")
-			window_maximize_all_item.set_text ("Maximize all")
-			window_minimize_all_item.set_text ("Minimize all")
-			window_raise_all_item.set_text ("Raise all")
-			help_menu.set_text ("Help")
-			help_about_item.set_text ("About")
-				-- Add attributes to buttons
-			new_target_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_object_symbol_buffer))
-			new_target_button.set_tooltip ("New target")
-			open_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_open_file_color_buffer))
-			open_button.set_tooltip ("Open")
-			save_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_save_color_buffer))
-			save_button.set_tooltip ("Save")
-			undo_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_undo_color_buffer))
-			undo_button.set_tooltip ("Undo")
-			redo_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_redo_color_buffer))
-			redo_button.set_tooltip ("Redo")
-			new_window_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_new_development_tool_color_buffer))
-			new_window_button.set_tooltip ("New window")
-			minimize_all_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_minimize_all_color_buffer))
-			minimize_all_button.set_tooltip ("Minimize all")
-			raise_all_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_restore_all_color_buffer))
-			raise_all_button.set_tooltip ("Raise all")
-			help_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_help_tool_color_buffer))
-			help_button.set_tooltip ("Help")
+			Precursor {SPLIT_VIEW}
+			Precursor {EV_TITLED_WINDOW}
 		end
 
 	initialize
@@ -163,8 +126,8 @@ feature {NONE} -- Initialization
 			upper_bar.extend (jj_tool_bar_box)
 			upper_bar.extend (create {EV_HORIZONTAL_SEPARATOR})
 				-- Create and add the status bar.
-			build_standard_status_bar
-			lower_bar.extend (jj_status_bar)
+--			build_standard_status_bar
+--			lower_bar.extend (jj_status_bar)
 				-- Set up window attributes
 --			set_system (sys)		-- commented out for dynamic editor
 --			set_target (system)
@@ -174,6 +137,7 @@ feature {NONE} -- Initialization
 			set_preferences_dialog (Default_preferences_dialog)
 				-- Set up the "split-managed" cell, bar, and menu.
 			set_split_manager (split_manager)
+			set_title (Window_title)
 --			draw
 		end
 
@@ -215,6 +179,24 @@ feature {NONE} -- Initialization
 	build_standard_menu_bar
 			-- Create and populate `jj_menu_bar'.
 		do
+				-- Add attributes to menu items
+			file_menu.set_text ("File")
+			file_new_target_item.set_text ("New target")
+			file_save_item.set_text ("Save")
+			file_open_item.set_text ("Open")
+			file_exit_item.set_text ("Exit")
+			edit_menu.set_text ("Edit")
+			edit_undo_item.set_text ("Undo")
+			edit_redo_item.set_text ("Redo")
+			tool_menu.set_text ("Tool")
+			tool_preferences_item.set_text ("Preferences")
+			window_menu.set_text ("Window")
+			window_new_item.set_text ("New")
+			window_maximize_all_item.set_text ("Maximize all")
+			window_minimize_all_item.set_text ("Minimize all")
+			window_raise_all_item.set_text ("Raise all")
+			help_menu.set_text ("Help")
+			help_about_item.set_text ("About")
 				-- Register and fill the "File" menu
 			file_menu.extend (file_new_target_item)
 			file_menu.extend (file_open_item)
@@ -250,6 +232,25 @@ feature {NONE} -- Initialization
 		local
 			lab: EV_LABEL
 		do
+				-- Add attributes to buttons
+			new_target_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_object_symbol_buffer))
+			new_target_button.set_tooltip ("New target")
+			open_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_open_file_color_buffer))
+			open_button.set_tooltip ("Open")
+			save_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_save_color_buffer))
+			save_button.set_tooltip ("Save")
+			undo_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_undo_color_buffer))
+			undo_button.set_tooltip ("Undo")
+			redo_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_redo_color_buffer))
+			redo_button.set_tooltip ("Redo")
+			new_window_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_new_development_tool_color_buffer))
+			new_window_button.set_tooltip ("New window")
+			minimize_all_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_minimize_all_color_buffer))
+			minimize_all_button.set_tooltip ("Minimize all")
+			raise_all_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_restore_all_color_buffer))
+			raise_all_button.set_tooltip ("Raise all")
+			help_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_help_tool_color_buffer))
+			help_button.set_tooltip ("Help")
 				-- Add the buttons to the toolbar
 			jj_tool_bar.extend (new_target_button)
 			jj_tool_bar.extend (open_button)
@@ -275,17 +276,17 @@ feature {NONE} -- Initialization
 			toolbar_created: jj_tool_bar /= Void and then  not jj_tool_bar.is_empty
 		end
 
-	build_standard_status_bar
-			-- Create and populate the status bar at bottom of window.
-		do
-			jj_status_bar.set_border_width (2)
-			jj_status_label.align_text_left
-			jj_status_bar.extend (jj_status_label)
-		ensure
-			status_bar_created:
-				jj_status_bar /= Void and then
-				jj_status_label /= Void
-		end
+--	build_standard_status_bar
+--			-- Create and populate the status bar at bottom of window.
+--		do
+--			jj_status_bar.set_border_width (2)
+--			jj_status_label.align_text_left
+--			jj_status_bar.extend (jj_status_label)
+--		ensure
+--			status_bar_created:
+--				jj_status_bar /= Void and then
+--				jj_status_label /= Void
+--		end
 
 feature -- Access
 
@@ -409,11 +410,11 @@ feature -- Element change
 			window_registered: preferences_dialog = a_window
 		end
 
-	set_status_text (a_text: STRING_8)
-			-- Change the text in the status bar.
-		do
-			jj_status_label.set_text (a_text)
-		end
+--	set_status_text (a_text: STRING_8)
+--			-- Change the text in the status bar.
+--		do
+--			jj_status_label.set_text (a_text)
+--		end
 
 feature -- Basic operations
 
@@ -910,13 +911,13 @@ feature {NONE} -- Toolbars and buttons
 
 feature {NONE} -- Status bar
 
-	jj_status_bar: EV_STATUS_BAR
-			-- Standard status bar for this window
+--	jj_status_bar: EV_STATUS_BAR
+--			-- Standard status bar for this window
 
-	jj_status_label: EV_LABEL
-			-- Label situated in the `jj_status_bar'.
-			-- Note: Call `set_status_text' to change the text
-			--       displayed in the status bar.
+--	jj_status_label: EV_LABEL
+--			-- Label situated in the `jj_status_bar'.
+--			-- Note: Call `set_status_text' to change the text
+--			--       displayed in the status bar.
 
 feature {NONE} -- Implementation / Constants
 

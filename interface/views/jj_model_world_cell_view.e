@@ -38,6 +38,7 @@ feature {NONE} -- Initialization
 			-- Implemented by descendants to create attached objects
 			-- in order to adhere to void-safety due to the implementation bridge pattern.
 		do
+				-- Must create `world' because not calling `make_with_world'
 			create world
 			Precursor {EV_MODEL_WORLD_CELL}
 			Precursor {VIEW}

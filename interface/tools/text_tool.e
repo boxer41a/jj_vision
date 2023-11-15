@@ -53,7 +53,7 @@ feature {NONE} -- Initialization
 		do
 			Precursor {TOOL}
 			tool_bar.extend (clear_button)
-			tool_bar.extend (create {EV_TOOL_BAR_SEPARATOR})
+--			tool_bar.extend (create {EV_TOOL_BAR_SEPARATOR})
 		end
 
 	add_actions
@@ -71,7 +71,7 @@ feature {NONE} -- Implementation
 			view.remove_text
 		end
 
-	clear_button: EV_TOOL_BAR_BUTTON
+	clear_button: EV_BUTTON  --EV_TOOL_BAR_BUTTON
 			-- Button to move to previous record
 
 	view: TEXT_VIEW
