@@ -27,6 +27,7 @@ inherit
 
 	EV_APPLICATION
 		redefine
+			create_interface_objects,
 			destroy
 		end
 
@@ -37,7 +38,7 @@ feature {NONE} -- Initialization
 
 	make_and_launch
 			-- Initialize and launch application
---		local
+		local
 --			l_app: EV_APPLICATION
 		do
 --				-- The use of `l_app' instead of inheritance is the style
@@ -57,6 +58,13 @@ feature {NONE} -- Initialization
 			launch
 		end
 
+	create_interface_objects
+			-- Set up the attribute
+		do
+			Precursor {EV_APPLICATION}
+			create target
+		end
+
 	prepare
 			-- Prepare the application by either loading it from a previous
 			-- execution or create a new one if an old one doesn't exist.
@@ -66,7 +74,7 @@ feature {NONE} -- Initialization
 --			initialize_directories
 --			rebuild_application
 			if not is_application_loaded then
-				create w
+				create w.make (target)
 				w.show
 			end
 		end
@@ -94,6 +102,9 @@ feature {NONE} -- Initialization
 		end
 
 feature -- Access
+
+	target: ANY
+			-- The top/main object handled by this application
 
 	frozen first_window: like window_anchor
 			-- Anchor to describe the type of the windows in the program.

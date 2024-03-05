@@ -18,28 +18,15 @@ inherit
 
 	VIEW_STATE
 		redefine
-			default_create,
 			make,
 			set_view_attributes,
 			new_view
 		end
 
 create
-	default_create,
 	make
 
 feature {NONE} -- Initialization
-
-	default_create
-			-- Initialize with reasonable values
-		do
-			x := Default_x
-			y := Default_y
-			height := Default_height
-			width := Default_width
--- FIX ME!
---			create split_manager_state
-		end
 
 	make (a_window: JJ_MAIN_WINDOW)
 			-- Initialize from attributes of `a_window'.
@@ -51,6 +38,7 @@ feature {NONE} -- Initialization
 			height := a_window.height
 			is_minimized := a_window.is_minimized
 			is_maximized := a_window.is_maximized
+			target := a_window.target
 		end
 
 feature -- Access
@@ -152,7 +140,7 @@ feature {NONE} -- Implementation
 	new_view: JJ_MAIN_WINDOW
 			-- Create the `view_imp'
 		do
-			create Result
+			create Result.make (target)
 		end
 
 invariant

@@ -36,6 +36,7 @@ feature {NONE} -- Initialization
 			a: ANY
 --			ds: DATASTORE
 		do
+			target := a_view.target
 --			ds := Application.persistence_manager.user_datastore
 --			a := a_view.target
 --			if a /= Void and then ds.is_stored (a) then
@@ -72,6 +73,10 @@ feature {NONE} -- Access
 		end
 
 feature {NONE} -- Implementation
+
+	target: ANY
+			-- The object that was displayed in the {VIEW} from
+			-- which this state was made
 
 	target_anchor: ANY
 			-- Type anchor for the creation of a new target of the correct type

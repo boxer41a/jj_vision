@@ -70,17 +70,6 @@ feature {NONE} -- Initialization
 			Precursor {VIEW}
 		end
 
-	make (a_target: like target)
-			-- Create object and initialize Current.
-		require
-			editable_exists: a_target /= Void
-		do
-			default_create
-			set_target (a_target)
---			add_object (target.target_label_field)
-			draw
-		end
-
 feature -- Access
 
 	time_stamp: YMDHMS_TIME
@@ -123,6 +112,22 @@ feature -- Comparison
 		end
 
 feature {NONE} -- Implementation
+
+	pointer_button_release_actions: EV_POINTER_BUTTON_ACTION_SEQUENCE
+			-- Actions to be performed when screen pointer button is pressed.
+			-- Defined here as place-holder to be undefined (i.e. joined) to
+			-- the version from {EV_WIDGET} or {EV_MODEL}.
+			-- See index clause for information on pick-and-put.
+		obsolete
+			"Do not call; deferred in {VIEW} to implement pick-and-put"
+		do
+			create Result
+			check
+				do_not_call: false
+					-- Because this feature should be UNDEFINED and the
+					-- version from {EV_WIDGET} or {EV_MODEL} called.
+			end
+		end
 
 	draw
 			-- Put the correct text into this EV_LIST_ITEM.

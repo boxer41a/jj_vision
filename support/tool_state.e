@@ -9,7 +9,7 @@ note
 	URL: 		"$URL: file:///F:/eiffel_repositories/jj_vision/trunk/support/tool_state.e $"
 	date:		"$Date: 2012-03-16 14:05:07 -0400 (Fri, 16 Mar 2012) $"
 	revision:	"$Revision: 7 $"
-	
+
 class
 	TOOL_STATE
 
@@ -63,7 +63,9 @@ feature {NONE} -- Implementation
 	new_view: TOOL
 			-- Create a new tool
 		do
-			create Result
+			check attached {like target_anchor} target as t then
+				create Result.make (t)
+			end
 		end
 
 end

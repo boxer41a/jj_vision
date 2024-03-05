@@ -28,25 +28,25 @@ inherit
 		end
 
 create
-	default_create
+	make
 
 create {JJ_MODEL_WORLD_VIEW}
 	list_make
 
 feature {NONE} -- Initialization
 
-	frozen default_create
-			-- Create an instance.
-			-- Creation feature added to align more with the usage pattern of
-			-- descendents of EV_ANY, since EV_MODEL_WORLD is a descendent of
-			-- ANY--not EV_ANY.
-			-- The feature calls `create_interface_objects' via `default_create'
-			-- defined in EV_MODEL.  It then calls `initialize'.
+	default_create
+			-- Standard creation procedure, added to align with the pattern
+			-- used by `default_create' from {EV_ANY}.
+			-- Remember, `make' from {VIEW} calls `default_create', which
+			-- in {EV_ANY} calls both `create_interface_objects' and later
+			-- `initialize'.  However, `default_create' from {EV_MODEL_WORLD}
+			-- does NOT call `initialize'.
 		do
---			Precursor {VIEW}				-- {VIEW} undefines `default_create'
-			Precursor {EV_MODEL_WORLD}  -- calls `create_interface_objects'
-			initialize	-- from {VIEW}
---			add_actions	-- from {VIEW}
+				-- Precursor eventually calls `create_interface_objects'
+			Precursor {EV_MODEL_WORLD}
+				-- now, also call `initialzie'
+			initialize
 		end
 
 	create_interface_objects

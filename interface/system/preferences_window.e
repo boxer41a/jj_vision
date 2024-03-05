@@ -15,7 +15,8 @@ class
 
 inherit
 
-	SPLIT_VIEW
+--	SPLIT_VIEW
+	VIEW
 		undefine
 --			default_create,
 			copy
@@ -35,7 +36,8 @@ inherit
 		end
 
 create
-	default_create
+	default_create,
+	make
 
 feature {NONE} -- Initialization
 
@@ -44,7 +46,7 @@ feature {NONE} -- Initialization
 			-- Implemented by descendants to create attached objects
 			-- in order to adhere to void-safety due to the implementation bridge pattern.
 		do
-			Precursor {SPLIT_VIEW}
+			Precursor {VIEW}
 			Precursor {EV_TITLED_WINDOW}
 		end
 
@@ -52,9 +54,10 @@ feature {NONE} -- Initialization
 			-- Set up the window
 		do
 			Precursor {EV_TITLED_WINDOW}
-			Precursor {SPLIT_VIEW}
+			Precursor {VIEW}
 			set_title ("System Preferences")
-			split_manager.extend (create {WINDOW_PREFERENCES_VIEW})
+--			split_manager.extend (create {WINDOW_PREFERENCES_VIEW})
+			extend (create {WINDOW_PREFERENCES_VIEW})
 		end
 
 end

@@ -17,6 +17,7 @@ inherit
 
 	VIEW
 		undefine
+--			default_create,
 			copy,
 			is_equal
 		redefine

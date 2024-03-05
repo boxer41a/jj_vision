@@ -2,25 +2,14 @@ note
 	description: "[
 		Used as common ancestor to all "windows" in a system built using the 
 		"jj_vision" cluster.  It provides a way through feature `draw_views'
-		for updating all the views which contain the argument to that feature. 
-		Objects which this view will be responsible for displaying are contained in
-		feature `target_set'.  The view can force a redraw of all other views
-		containing a certain temp_object (preferably a temp_object which it contains) by using
-		feature `draw_views' and passing the changed temp_object.  Alternatively, the view
-		can force the redraw of views containing any of several objects by passing a set
-		of changed objects to feature `draw_views_with_set'.  This class undefines 
-		features from ANY with the intent that this class will be ancestor along with
-		some effected EV_WIDGET which will effect those features.
-		NOTE:  LINKED_SET was used as a client for feature `target_set'; using
-		inheritance causes too many name clashes with EV_WIDGET.
+		for updating all the views which contain that `target'. 
+		Alternatively, the view
+		can force the redraw of views containing any of several objects by passing 
+		a set of changed objects to feature `draw_views_with_set'.  
+		The class should be an ancestor ancestor along with
+		some effected EV_WIDGET.
 		NOTE:  Views which are `is_destroyed' are removed from the global `views' set
-		in feature `draw_views'.  This elliminated the need to force descendents to
-		redefine `destroy' and `is_destroyed'.  It is simpler this way.
-		]"
-	instructions: "[
-		Must redefine `draw'.
---		When redefining `initialize' call precursor of VIEW after the precursor for
---		the EV_WIDGET because of pre and post-conditions involving `is_initialized'.
+		in feature `draw_views'.
 		]"
 	date: "18 Jul 03"
 	author:		"Jimmy J. Johnson"
@@ -45,16 +34,39 @@ inherit
 			default_create
 		end
 
+--create
+--	make
+
 feature {NONE} -- Initialization
+
+	make (a_target: like target)
+			-- Create a new view to display `a_target'
+		do
+				-- This assignment is required to avoid violating a
+				-- precondition "not_empty" later when calling
+				-- feature `create_interface_objects".
+			target_imp := a_target
+				-- `default_create from:
+				-- 1) {EV_ANY} calls `create_interface_objects', later `initialize'
+				-- 2) {EV_MODEL calls only `create_interface_objects'
+			default_create
+			set_target (a_target)
+			draw
+		end
 
 	create_interface_objects
 			-- Create objects to be used by `Current' in `initialize'
 			-- Implemented by descendants to create attached objects
 			-- in order to adhere to void-safety due to the implementation
 			-- bridge pattern.
+			-- Called by `default_create' from {EV_ANY} or {EV_MODEL}
+		require
+			not_interface_objects_created: not is_interface_objects_created
 		do
-			create target_set.make
 			create pixmap.make_with_pixel_buffer (Icon_new_class_color_buffer)
+			is_interface_objects_created := true
+		ensure
+			interface_objects_created: is_interface_objects_created
 		end
 
 	initialize
@@ -62,7 +74,6 @@ feature {NONE} -- Initialization
 		require
 			view_not_initialized: not is_view_initialized
 		do
-			views.extend (Current)
 			add_actions
 			is_view_initialized := True
 		ensure
@@ -73,10 +84,20 @@ feature {NONE} -- Initialization
 			-- Add any actions to Current.
 			-- Called by `initialize'.
 		require
---			view_not_initialized: not is_view_initialized
+			not_initialized: not is_view_initialized
 		do
-			is_view_initialized := True
+			pointer_button_press_actions.extend (agent on_prepick_right_click)
+			pick_actions.extend (agent on_picked)
+			pointer_motion_actions.extend (agent on_postput_move)
 		end
+
+feature -- Status report
+
+	is_interface_objects_created: BOOLEAN
+			-- Has `create_interface_objects' been called?
+
+	is_view_initialized: BOOLEAN
+			-- Has the view been set up?
 
 feature -- Access
 
@@ -126,23 +147,6 @@ feature -- Access
 			end
 		end
 
-	target_item: ANY
-			-- Current target in the set.
-		require
-			readable: not is_view_off
-		do
-			Result := target_set.item
-		ensure
-			valid_result: Result /= Void
-		end
-
-	objects: LINEAR [ANY]
-			-- A copy of the list of targets stored in this view.
-		do
-			target_set.start
-			Result := target_set.duplicate (target_set.count)
-		end
-
 	parent_window: JJ_MAIN_WINDOW
 			-- The {JJ_MAIN_WINDOW} if any which contains this view.
 			-- Must redefine to change type.
@@ -185,70 +189,31 @@ feature -- Access
 feature -- Element change
 
 	set_target (a_target: like target)
-			-- Change the value of `target' and add it to the `target_set' (the set
-			-- of objects contained in this view.  The old target is removed from
-			-- the set.
-			-- This feature can be used as a pattern if a descendant wants to give
-			-- special treatment to a single target.
+			-- Change the value of `target' and realign the table or list
+			-- of views in which `a_target' is displayed.
 		do
-			if target_imp /= Void then
-				target_set.prune (target)
-			end
-			target_set.extend (a_target)
-			target_imp := a_target
-		ensure
-			target_assigned: target = a_target
-			contains_target: a_target /= Void implies target_set.has (a_target)
-		end
-
-	add_target (a_target: like target)
-			-- Add `a_target' to the list of items in this view and make
-			-- `a_target' the current `target'.  Use this feature
-			-- for views which require more objects than simply a `target' when
-			-- the other objects do not need special handling.  (See `set_target'
-			-- for pattern usage if the other objects need special handling.)
-		require
-			target_exists: a_target /= Void
-		do
-			target_set.extend (a_target)
-			target_imp := a_target
-		ensure
-			has_target: target_set.has (a_target)
-			target_assiged: target = a_target
-		end
-
-	prune_target (a_target: like target)
-			-- Remove `a_object' from the view.
-			-- If `a_target' was the previous `target' then make `target'
-			-- become the first item in the set of targets or Void if the
-			-- set is empty.
-		require
-			target_exists: a_target /= Void
-		do
-			target_set.prune (a_target)
-			if target = a_target then
-				if target_set.is_empty then
-					target_imp := Void
-				else
-					check attached {like target} target_set.first as t then
-						target_imp := t
-					end
+				-- Remove the old association
+			if attached target_imp and then target /= a_target then
+				check
+					has_associated_view: views_table.has (target)
+						-- because `target_imp' not Void and `make'
 				end
+				views_table.prune (Current)
+				target_imp := Void
+			end
+			if target_imp = Void then
+					-- the expected case, except of initial creation
+				target_imp := a_target
+				views_table.extend (Current)
+			elseif not views_table.has_view (Current) then
+				check
+					same_object: target_imp = a_target
+						-- because of assignment statement in `make'
+				end
+				views_table.extend (Current)
 			end
 		ensure
-			target_removed: not has_target (a_target)
-			target_voided_if_same: a_target = old target implies target = Void
-			target_unchanded_if_not_same: a_target /= old target implies target = old target
-		end
-
-	remove_all_targets
-			-- Remove all the objects from this view.
-		do
-			target_set.wipe_out
-			target_imp := Void
-		ensure
-			has_no_targets: target_set.is_empty
-			target_voided: target = Void
+			has_target: has_target (a_target)
 		end
 
 feature -- Basic operations
@@ -279,30 +244,29 @@ feature -- Basic operations
 
 	draw_views (a_target: ANY)
 			-- Draw the views which contain `a_target'.
-			-- This also cleans any "destroyed" views from the `views' set.
-		require
-			target_exists: a_target /= Void
 		local
+			lin: LINEAR [VIEW]
 			marks: LINKED_SET [VIEW]	-- Views marked for removal.
 			v: VIEW
 		do
 			create marks.make
-			from views.start
-			until views.exhausted
+			lin := views_table.linear (a_target)
+			from lin.start
+			until lin.after
 			loop
-				v := views.item
+				v := lin.item
 				if v.is_destroyed then
 					marks.extend (v)
-				elseif not v.is_draw_disabled and then
-						v.has_target (a_target) then
+				elseif not v.is_draw_disabled then
 					v.draw
 				end
-				views.forth
+				lin.forth
 			end
+				-- Clean out any views that are no longer usable.
 			from marks.start
 			until marks.exhausted
 			loop
-				views.prune (marks.item)
+				views_table.prune (marks.item)
 				marks.forth
 			end
 		end
@@ -313,32 +277,28 @@ feature -- Basic operations
 		require
 			set_exists: a_set /= Void
 		local
+			lin: LINEAR [VIEW]
 			marks: LINKED_SET [VIEW]	-- Views marked for removal.
 			v: VIEW
 		do
 			create marks.make
-			from views.start
-			until views.exhausted
+			lin := views_table.linear_with_set (a_set)
+			from lin.start
+			until lin.after
 			loop
-				v := views.item
+				v := lin.item
 				if v.is_destroyed then
 					marks.extend (v)
 				elseif not v.is_draw_disabled then
-					from a_set.start
-					until a_set.exhausted
-					loop
-						if v.has_target (a_set.item) then
-							v.draw
-						end
-						a_set.forth
-					end
+					v.draw
 				end
-				views.forth
+				lin.forth
 			end
+				-- Clean out any views that are no longer usable.
 			from marks.start
 			until marks.exhausted
 			loop
-				views.prune (marks.item)
+				views_table.prune (marks.item)
 				marks.forth
 			end
 		end
@@ -347,33 +307,33 @@ feature -- Basic operations
 			-- Draw *all* the views in the system.
 			-- Also cleans any "destroyed" views for the `views' set.
 		local
+			lin: LINEAR [VIEW]
 			marks: LINKED_SET [VIEW]	-- Views marked for removal.
 			v: VIEW
 		do
 			create marks.make
-			from views.start
-			until views.exhausted
+			lin := views_table.linear_representation
+			from lin.start
+			until lin.after
 			loop
-				v := views.item
+				v := lin.item
 				if v.is_destroyed then
 					marks.extend (v)
 				elseif not v.is_draw_disabled then
 					v.draw
 				end
-				views.forth
+				lin.forth
 			end
+				-- Clean out any views that are no longer usable.
 			from marks.start
 			until marks.exhausted
 			loop
-				views.prune (marks.item)
+				views_table.prune (marks.item)
 				marks.forth
 			end
 		end
 
 feature -- Status report
-
-	is_view_initialized: BOOLEAN
-			-- Has the view been set up?
 
 	is_in_default_state: BOOLEAN = true
 			-- Is `Current' in its default state?
@@ -397,29 +357,7 @@ feature -- Status report
 	is_view_empty: BOOLEAN
 			-- Are there no objects in this VIEW?
 		do
-			Result := target_set.is_empty
-		ensure
-			valid_result: Result implies target_set.is_empty
-		end
-
-	is_view_off: BOOLEAN
-		do
-			Result := target_set.off
-		end
-
-	is_view_before: BOOLEAN
-		do
-			Result := target_set.before
-		end
-
-	is_view_after: BOOLEAN
-		do
-			Result := target_set.after
-		end
-
-	is_view_exhausted: BOOLEAN
-		do
-			Result := target_set.exhausted
+			Result := target_imp = Void
 		end
 
 	is_draw_disabled: BOOLEAN
@@ -446,9 +384,10 @@ feature -- Status setting
 
 feature -- Query
 
-	has_target (a_target: like target_item): BOOLEAN
+	has_target (a_target: like target): BOOLEAN
+			-- Does Current contain `a_target'?
 		do
-			Result := target_set.has (a_target)
+			Result := target_imp = a_target
 		end
 
 	display_name (a_object: ANY): STRING
@@ -479,26 +418,194 @@ feature -- Query
 			create Result
 		end
 
-feature -- Cursor movement
+feature -- Basic operations
 
-	targets_start
+	prepick_operations
+			-- Feature called just before a pick-and-put (PNP)
+			-- operation starts (i.e. when a right-click occurs).
+			-- See index clause for information on pick-and-put.
 		do
-			target_set.start
+			print (generating_type.name + ".prepick_operations %N")
 		end
 
-	targets_forth
-		require
-			not_after: not is_view_after
+	postput_operations
+			-- Feature called just after a pick-and-put (PNP)
+			-- operation ends.  The end (either a drop or a cancel)
+			-- of a PNP operations is detected when a mouse-move
+			-- event occurs.)
+			-- See index clause for information on pick-and-put.
 		do
-			target_set.forth
+			print (generating_type.name + ".postpick_operations %N")
 		end
 
-	targets_back
-		require
-			not_before: not is_view_before
-		do
-			target_set.back
+
+feature {NONE} -- Agents and support (actions)
+
+	is_picking: BOOLEAN_REF
+			-- Is a pick-and-put (PNP) operation in progress?
+			-- It seems the PNP operations intercepts events system-
+			-- wide, so this is a global reference.
+			-- See index clause for information on pick-and-put.
+		once
+			create Result
 		end
+
+	on_prepick_right_click (a_x, a_y, a_button: INTEGER;
+								 a_x_tilt, a_y_tilt, a_pressure: DOUBLE;
+								 a_screen_x, a_screen_y: INTEGER)
+			-- Feature added as agent to `pointer_button_press_actions' to
+			-- react to a right-click in order to call `prepick_operations'
+			-- right before a PNP begins.  (Feature `pick_actions' does not
+			-- allow some views to show their updates until the pebble
+			-- transport is complete.)
+		local
+			lin: like views_table.linear_representation
+			v: VIEW
+		do
+			lin := views_table.linear_representation
+			if a_button = 3 then
+				prepick_operations
+--				is_picking.set_item (true)
+				from lin.start
+				until lin.after
+				loop
+					v := lin.item
+					v.pointer_motion_actions.extend (post_pick_move_agent)
+					lin.forth
+				end
+			end
+		end
+
+	frozen on_postput_move (a_x, a_y: INTEGER;
+								 a_x_tilt, a_y_tilt, a_pressure: DOUBLE;
+								 a_screen_x, a_screen_y: INTEGER)
+			-- Feature added as agent to `pointer_motion_actions'
+			-- to react after a pnp operations has ended.  It calls
+			-- feature `postput_operations'.
+			-- Redefine `postput_operations' to clean up any operations
+			-- that occurred in `do_prepick_operations'.
+			-- See index clause for information on pick-and-put.
+		local
+			lin: like views_table.linear_representation
+			v: VIEW
+		do
+			lin := views_table.linear_representation
+			if is_picking.item then
+				postput_operations
+				is_picking.set_item (false)
+					-- Remove this feature (the agent) from move actions
+				from lin.start
+				until lin.after
+				loop
+					v := lin.item
+					v.pointer_motion_actions.prune (post_pick_move_agent)
+					lin.forth
+				end
+			end
+		end
+
+	on_picked (a_x, a_y: INTEGER)
+			-- Do something when a pick happens
+		do
+			is_picking.set_item (true)
+				-- Even though `prepick_operations' executes, the EV_MODELs
+				-- in the views do not reflect changes until he transport is
+				-- over, at which time `on_postput_move' is called reversing
+				-- the changes.  It appears as if nothing changed.
+--			prepick_operations
+--			is_picking.set_item (true)
+--			from views.start
+--			until views.after
+--			loop
+--				list := views.item_for_iteration
+--				from list.start
+--				until list.after
+--				loop
+--					v := list.item_for_iteration
+--					v.pointer_motion_actions.extend (post_pick_move_agent)
+--					list.forth
+--				end
+--				views.forth
+--			end
+		end
+
+	post_pick_move_agent: PROCEDURE [TUPLE [a_x, a_y: INTEGER;
+								 a_x_tilt, a_y_tilt, a_pressure: DOUBLE;
+								 a_screen_x, a_screen_y: INTEGER]]
+			-- Creates an agent out of `on_postput_move' which is added to
+			-- the `pointer_motion_actions' of *ALL* views when a pick occurs
+			-- (see `on_picked').  Holding on to this agent as a once feature
+			-- allows `on_postput_move' to remove this agent from *ALL* the
+			-- views after the pick has ended and the mouse is moved [in one
+			-- of the views].
+		once
+			Result := agent on_postput_move
+		end
+
+feature -- Action sequences
+
+	pointer_button_press_actions: EV_POINTER_BUTTON_ACTION_SEQUENCE
+			-- Actions to be performed when screen pointer button is pressed.
+			-- Defined here as place-holder to be undefined (i.e. joined) to
+			-- the version from {EV_WIDGET} or {EV_MODEL}.
+			-- See index clause for information on pick-and-put.
+		deferred
+		end
+--		do
+--			create Result
+--			check
+--				do_not_call: false
+--					-- Because this feature should be UNDEFINED and the
+--					-- version from {EV_WIDGET} or {EV_MODEL} called.
+--			end
+--		end
+
+	pointer_button_release_actions: EV_POINTER_BUTTON_ACTION_SEQUENCE
+			-- Actions to be performed when screen pointer button is pressed.
+			-- Defined here as place-holder to be undefined (i.e. joined) to
+			-- the version from {EV_WIDGET} or {EV_MODEL}.
+			-- See index clause for information on pick-and-put.
+		deferred
+		end
+--		do
+--			create Result
+--			check
+--				do_not_call: false
+--					-- Because this feature should be UNDEFINED and the
+--					-- version from {EV_WIDGET} or {EV_MODEL} called.
+--			end
+--		end
+
+	pointer_motion_actions: EV_POINTER_MOTION_ACTION_SEQUENCE
+			-- Actions to be performed when screen pointer moves.
+			-- Defined here as place-holder to be undefined (i.e. joined) to
+			-- the version from {EV_WIDGET} or {EV_MODEL}.
+			-- See index clause for information on pick-and-put.
+		deferred
+		end
+--		do
+--			create Result
+--			check
+--				do_not_call: false
+--					-- Because this feature should be UNDEFINED and the
+--					-- version from {EV_WIDGET} or {EV_MODEL} called.
+--			end
+--		end
+
+	pick_actions: EV_PND_START_ACTION_SEQUENCE
+			-- Actions to be performed when `pebble' is picked up.
+			-- Defined here as place-holder to be undefined by some
+			-- {EV_WIDGET} or {EV_MODEL}.
+		deferred
+		end
+--		do
+--			create Result
+--			check
+--				do_not_call: false
+--					-- Because this feature should be UNDEFINED and the
+--					-- version from {EV_WIDGET} or {EV_MODEL} called.
+--			end
+--		end
 
 feature {NONE} -- Implementation
 
@@ -527,18 +634,14 @@ feature {NONE} -- Implemetation
 	target_imp: detachable ANY
 			-- Detachable implementation of `target' for void safety
 
-	target_set: LINKED_SET [ANY]
-			-- Objects which this view is to display.
-
-	views: LINKED_SET [VIEW]
-			-- Global set to hold all the VIEWs in a system.
+	views_table: VIEW_TARGET_TABLE
+			-- Global table associating objects to views
 		once
-			create Result.make
+			create Result
 		end
 
 invariant
 
-	target_set_exists: target_set /= Void
-	contains_target: target_imp /= Void implies target_set.has (target)
+--	not_empty: target_imp /= Void
 
 end

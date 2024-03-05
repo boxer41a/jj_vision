@@ -61,7 +61,7 @@ feature -- Access
 	display_name: STRING_32
 			-- Used as an "out" value for display in TOOLs and other widgets.
 		do
-			if attached {STRING} value (schema.identifying_field.label) as s then
+			if attached {STRING_32} value (schema.identifying_field.label) as s then
 				Result := s
 			else
 				Result := Current.id

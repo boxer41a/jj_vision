@@ -12,26 +12,29 @@ deferred class
 
 inherit
 
-	VIEW
-		redefine
-			create_interface_objects
-		end
+--	VIEW
+--		redefine
+--			create_interface_objects
+--		end
 
-feature {NONE} -- Initialization
+--feature {NONE} -- Initialization
 
-	create_interface_objects
-			-- Create objects to be used by `Current' in `initialize'
-			-- Implemented by descendants to create attached objects
-			-- in order to adhere to void-safety due to the implementation bridge pattern.
-		do
-			create split_manager
-			Precursor {VIEW}
-		end
+--	create_interface_objects
+--			-- Create objects to be used by `Current' in `initialize'
+--			-- Implemented by descendants to create attached objects
+--			-- in order to adhere to void-safety due to the implementation bridge pattern.
+--		do
+--			create split_manager
+--			Precursor {VIEW}
+--		end
 
 feature -- Access
 
 	split_manager: SPLIT_MANAGER
 			-- Manages the placement of sub-views within current.
+		attribute
+			create Result
+		end
 
 feature -- Element change
 

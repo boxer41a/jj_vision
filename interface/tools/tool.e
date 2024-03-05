@@ -65,7 +65,7 @@ class
 
 inherit
 
-	SPLIT_VIEW
+	VIEW
 		undefine
 --			default_create,
 			copy
@@ -85,9 +85,7 @@ inherit
 			is_in_default_state
 		redefine
 			create_interface_objects,
-			initialize,
-			destroy,
-			is_destroyed
+			initialize
 		end
 
 	PIXEL_BUFFERS
@@ -97,7 +95,7 @@ inherit
 		end
 
 create
-	default_create
+	make
 
 feature {NONE} -- Initialization
 
@@ -106,7 +104,7 @@ feature {NONE} -- Initialization
 			-- Implemented by descendants to create attached objects
 			-- in order to adhere to void-safety due to the implementation bridge pattern.
 		do
-			Precursor {SPLIT_VIEW}
+			Precursor {VIEW}
 			Precursor {EV_FRAME}
 --			create history
 			create history_dropdown
@@ -124,7 +122,7 @@ feature {NONE} -- Initialization
 			create tool_name_label
 			create target_label
 --			create history_combo		-- see "fix me" comment before `update_history_combo' feature
---			create split_manager
+			create split_manager
 				-- Create buttons
 			create back_button
 			create forth_button
@@ -152,8 +150,8 @@ feature {NONE} -- Initialization
 			hs: EV_HORIZONTAL_SEPARATOR
 		do
 			Precursor {EV_FRAME}
-			Precursor {SPLIT_VIEW}
-			tools.extend (Current)
+			Precursor {VIEW}
+--			tools.extend (Current)
 				-- Prevent the tool from holding more than one target, so
 				-- the history functions will work.
 			history_dropdown.set_parent_tool (Current)
@@ -237,7 +235,7 @@ feature {NONE} -- Initialization
 	add_actions
 			-- Add functionality to the buttons.
 		do
-			Precursor {SPLIT_VIEW}
+			Precursor {VIEW}
 			target_label.set_pebble_function (agent on_get_target)
 				-- Add actions to the buttons.
 			maximize_button.select_actions.extend (agent on_maximize)
@@ -275,14 +273,16 @@ feature -- Element change
 			-- of objects contained in this view.  The old target is removed from
 			-- the set.
 		do
-			if target_imp /= a_target then
-				Precursor {SPLIT_VIEW} (a_target)
---				add_object (a_target.target_label_field)
---				tool_label.set_accept_cursor (a_viewable.accept_cursor)
---				tool_label.set_deny_cursor (a_viewable.deny_cursor)
-				update_history
-				draw
-			end
+			Precursor {VIEW} (a_target)
+			update_history
+--			if target_imp /= a_target then
+--				Precursor {VIEW} (a_target)
+----				add_object (a_target.target_label_field)
+----				tool_label.set_accept_cursor (a_viewable.accept_cursor)
+----				tool_label.set_deny_cursor (a_viewable.deny_cursor)
+--				update_history
+--				draw
+--			end
 		end
 
 --	set_user_text (a_string: STRING)
@@ -327,11 +327,11 @@ feature -- Status report
 			Result := resize_tool_bar.is_displayed
 		end
 
-	is_destroyed: BOOLEAN
-			-- Is `Current' no longer usable?
-		do
-			Result := not tools.has (Current) and Precursor {EV_FRAME}
-		end
+--	is_destroyed: BOOLEAN
+--			-- Is `Current' no longer usable?
+--		do
+--			Result := not tools.has (Current) and Precursor {EV_FRAME}
+--		end
 
 feature -- Status setting
 
@@ -397,16 +397,6 @@ feature -- Basic operations
 			target_label.set_text (s)
 			target_label.set_tooltip (n)
 			set_button_states
-		end
-
-	destroy
-			-- Destroy underlying native toolkit object.
-			-- Render `Current' unusable.
-		do
-			tools.prune (Current)
-			Precursor {EV_FRAME}
-		ensure then
-			not_in_tool_set: not tools.has (Current)
 		end
 
 feature {NONE} -- Actions
@@ -730,13 +720,19 @@ feature {HISTORY_DROPDOWN} -- Implementation
 			Result_exists: Result /= Void
 		end
 
-feature {TOOL} -- Implementation
+feature {NONE} -- Implementation
 
-	tools: LINKED_SET [TOOL]
-			-- Keeps track of all the TOOLs in the system
-		once
-			create Result.make
-		end
+	split_manager: SPLIT_MANAGER
+			-- Controls placement of sub-windows
+
+
+--feature {TOOL} -- Implementation
+
+--	tools: LINKED_SET [TOOL]
+--			-- Keeps track of all the TOOLs in the system
+--		once
+--			create Result.make
+--		end
 
 feature {NONE} -- Constants
 

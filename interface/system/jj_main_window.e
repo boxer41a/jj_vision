@@ -21,7 +21,7 @@ class
 
 inherit
 
-	SPLIT_VIEW
+	VIEW
 		undefine
 --			default_create,
 			copy
@@ -30,7 +30,7 @@ inherit
 			initialize,
 			draw,
 			state,
-			set_split_manager,
+--			set_split_manager,
 			add_actions
 		end
 
@@ -53,7 +53,7 @@ inherit
 		end
 
 create
-	default_create
+	make
 
 feature {NONE} -- Initialization
 
@@ -62,6 +62,7 @@ feature {NONE} -- Initialization
 			-- Implemented by descendants to create attached objects
 			-- in order to adhere to void-safety due to the implementation bridge pattern.
 		do
+			create split_manager
 				-- Create the "File" menu
 			create file_menu
 			create file_new_target_item
@@ -104,7 +105,7 @@ feature {NONE} -- Initialization
 --			create jj_status_label
 				-- Create the dialogs
 			create preferences_dialog
-			Precursor {SPLIT_VIEW}
+			Precursor {VIEW}
 			Precursor {EV_TITLED_WINDOW}
 		end
 
@@ -115,7 +116,7 @@ feature {NONE} -- Initialization
 		do
 --			create split_manager
 			Precursor {EV_TITLED_WINDOW}
-			Precursor {SPLIT_VIEW}
+			Precursor {VIEW}
 			main_windows.extend (Current)
 				-- Create and add the menu bar.
 			build_standard_menu_bar
@@ -136,7 +137,10 @@ feature {NONE} -- Initialization
 --			set_widget_states
 			set_preferences_dialog (Default_preferences_dialog)
 				-- Set up the "split-managed" cell, bar, and menu.
-			set_split_manager (split_manager)
+			extend (split_manager.cell)
+			jj_tool_bar_box.extend (split_manager.bar)
+			window_menu.extend (split_manager.menu)
+				-- Finish the window
 			set_title (Window_title)
 --			draw
 		end
@@ -325,30 +329,6 @@ feature -- Status setting
 
 feature -- Element change
 
-	set_split_manager (a_manager: SPLIT_MANAGER)
-			-- Change the `split_manager'
-		do
-				-- Remove the old `split_manager' items from current.
-			if has (split_manager.cell) then
-				prune (split_manager.cell)
-			end
-			if upper_bar.has (split_manager.bar) then
---				upper_bar.prune (split_manager.bar)
-				jj_tool_bar_box.prune (split_manager.bar)
-			end
-			if window_menu.has (split_manager.menu) then
-				window_menu.prune (split_manager.menu)
-			end
-				-- Change the `split_manager'.
-			Precursor {SPLIT_VIEW} (a_manager)
-				-- Add the new items to Current
-			extend (split_manager.cell)
---			upper_bar.extend (split_manager.bar)
-			jj_tool_bar_box.extend (split_manager.bar)
-			window_menu.extend (split_manager.menu)
-		end
-
-
 --	restore_with_state (a_state: MAIN_WINDOW_STATE) is
 --			-- Set up window parameters as read from a file with name `a_file_name'.
 --			-- `A_file_name' should include the full path and name of the file.
@@ -430,9 +410,9 @@ feature -- Basic operations
 				s := app.generating_type + ":  "
 				if not is_view_empty then
 					if attached {EDITABLE} target as e then
-						s := s + e.display_name
+						s := s + e.display_name.to_string_8
 					else
-						s := s + target.generating_type
+						s := s + target.generating_type.name
 					end
 				else
 					s := s + "Empty"
@@ -602,8 +582,7 @@ feature {NONE} -- Actions
 		local
 			w: like Current
 		do
-			create w
-			w.set_target (a_target)
+			create w.make (a_target)
 			w.show
 		end
 
@@ -626,10 +605,7 @@ feature {NONE} -- Actions
 		local
 			w: like Current
 		do
-			create w
-			if target_imp /= Void then
-				w.set_target (target)
-			end
+			create w.make (target)
 			w.show
 		end
 
@@ -758,6 +734,7 @@ feature {NONE} -- Implementation (support routines)
 	Default_preferences_dialog: PREFERENCES_WINDOW
 			-- For setting window parameters
 		once
+--			create Result.make (target)
 			create Result
 			Result.close_request_actions.extend (agent Result.hide)
 		end
@@ -918,6 +895,11 @@ feature {NONE} -- Status bar
 --			-- Label situated in the `jj_status_bar'.
 --			-- Note: Call `set_status_text' to change the text
 --			--       displayed in the status bar.
+
+feature {NONE} -- Implementation
+
+	split_manager: SPLIT_MANAGER
+			-- Controls placement of sub-windows
 
 feature {NONE} -- Implementation / Constants
 

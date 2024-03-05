@@ -18,6 +18,7 @@ inherit
 
 	VIEW
 		undefine
+--			default_create,
 			copy
 		redefine
 			create_interface_objects,
