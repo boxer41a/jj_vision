@@ -35,7 +35,7 @@ feature {NONE} -- Initialization
 			go_previous_button.set_tooltip ("TEST_TOOL.go_previous_button")
 			go_next_button.set_pixmap (create {EV_PIXMAP}.make_with_pixel_buffer (Icon_shell_color_buffer))
 			go_next_button.set_tooltip ("TEST_TOOL.go_next_button")
-			create view
+			create view.make ("Test String")
 		end
 
 	initialize
@@ -52,7 +52,7 @@ feature {NONE} -- Initialization
 				-- Place buttons in toolbar
 			tool_bar.extend (go_previous_button)
 			tool_bar.extend (go_next_button)
-			tool_bar.extend (create {EV_TOOL_BAR_SEPARATOR})
+			tool_bar.extend (create {EV_HORIZONTAL_SEPARATOR})
 		end
 
 	add_actions
@@ -65,14 +65,15 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	view: JJ_MODEL_WORLD_VIEW
+	view: JJ_MODEL_WORLD_CELL_VIEW
+			-- The view controlled by this tool
 
 feature {NONE} -- Implementation
 
-	go_previous_button: EV_TOOL_BAR_BUTTON
+	go_previous_button: EV_BUTTON	--EV_TOOL_BAR_BUTTON
 			-- Button to move to previous record
 
-	go_next_button: EV_TOOL_BAR_BUTTON
+	go_next_button: EV_BUTTON	--EV_TOOL_BAR_BUTTON
 			-- Button to move to next record
 
-end -- class TEST_TOOL
+end

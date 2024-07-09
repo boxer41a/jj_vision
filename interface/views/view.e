@@ -1,11 +1,11 @@
 note
 	description: "[
-		Used as common ancestor to all "windows" in a system built using the 
+		Used as common ancestor to all "windows" in a system built using the
 		"jj_vision" cluster.  It provides a way through feature `draw_views'
-		for updating all the views which contain that `target'. 
+		for updating all the views which contain that `target'.
 		Alternatively, the view
-		can force the redraw of views containing any of several objects by passing 
-		a set of changed objects to feature `draw_views_with_set'.  
+		can force the redraw of views containing any of several objects by passing
+		a set of changed objects to feature `draw_views_with_set'.
 		The class should be an ancestor ancestor along with
 		some effected EV_WIDGET.
 		NOTE:  Views which are `is_destroyed' are removed from the global `views' set
@@ -23,6 +23,13 @@ deferred class
 	VIEW
 
 inherit
+
+	DIMABLE
+		undefine
+			default_create
+		redefine
+			set_dimming_level
+		end
 
 	SHARED
 		undefine
@@ -50,8 +57,8 @@ feature {NONE} -- Initialization
 				-- 1) {EV_ANY} calls `create_interface_objects', later `initialize'
 				-- 2) {EV_MODEL calls only `create_interface_objects'
 			default_create
-			set_target (a_target)
-			draw
+			set_target (a_target)	-- calls `draw'
+--			draw
 		end
 
 	create_interface_objects
@@ -74,6 +81,9 @@ feature {NONE} -- Initialization
 		require
 			view_not_initialized: not is_view_initialized
 		do
+--			initialize_dimable
+			dimming_level := Dim
+			previous_dimming_level := Dimmer
 			add_actions
 			is_view_initialized := True
 		ensure
@@ -82,7 +92,6 @@ feature {NONE} -- Initialization
 
 	add_actions
 			-- Add any actions to Current.
-			-- Called by `initialize'.
 		require
 			not_initialized: not is_view_initialized
 		do
@@ -97,7 +106,20 @@ feature -- Status report
 			-- Has `create_interface_objects' been called?
 
 	is_view_initialized: BOOLEAN
-			-- Has the view been set up?
+			-- Has `initialize' been called?
+
+	is_pick_notifiable: BOOLEAN
+			-- Should Current be notified by other views (normally
+			-- a view contained in Current) that some event has
+			-- occurred?
+			-- Feature `set_parent_view' must have been called on
+			-- the child view for this to take effect.
+
+	has_parent_view: BOOLEAN
+			-- Does Current know the view in which it resides?
+		do
+			Result := attached parent_view_imp
+		end
 
 feature -- Access
 
@@ -105,7 +127,7 @@ feature -- Access
 			-- The application in which Current resides.
 		do
 			check attached {JJ_APPLICATION} (create {EV_ENVIRONMENT}).application as app then
-					-- because {JJ_MAIN_WINDOW} (this class) is for use in a {JJ_APPLICATION}.
+					-- because this class is for use in a {JJ_APPLICATION}.
 				Result := app
 			end
 		end
@@ -174,6 +196,18 @@ feature -- Access
 			end
 		end
 
+	parent_view: attached like parent_view_imp
+			-- The view in which Current resides.
+			-- Provides a way for a model view to notify a parent
+			-- container of changes
+		require
+			has_parent_view: has_parent_view
+		do
+			check attached parent_view_imp as p then
+				Result := p
+			end
+		end
+
 	parent: detachable EV_CONTAINER
 			-- Parent of the current view.
 			-- To be effected by joining with an EV_ class
@@ -192,6 +226,7 @@ feature -- Element change
 			-- Change the value of `target' and realign the table or list
 			-- of views in which `a_target' is displayed.
 		do
+--			print ("VIEW.set_target:  a_target = " + target.out + "%N")
 				-- Remove the old association
 			if attached target_imp and then target /= a_target then
 				check
@@ -203,20 +238,43 @@ feature -- Element change
 			end
 			if target_imp = Void then
 					-- the expected case, except of initial creation
+--				print ("VIEW.set_target:  if statement target_imp = Void %N")
 				target_imp := a_target
 				views_table.extend (Current)
 			elseif not views_table.has_view (Current) then
+--				print ("VIEW.set_target:  not views_table.has (Current) %N")
 				check
 					same_object: target_imp = a_target
 						-- because of assignment statement in `make'
 				end
 				views_table.extend (Current)
 			end
+			draw
 		ensure
 			has_target: has_target (a_target)
 		end
 
+	set_parent_view (a_view: VIEW)
+			-- Set `parent_view' to `a_view', allowing Current to
+			-- notify `a_view' of some event (e.g. right click).
+		do
+			parent_view_imp := a_view
+		end
+
+	set_dimming_level (a_level: like dimming_level)
+			-- Change the `dimming_level'
+		do
+			Precursor (a_level)
+--			paint
+		end
+
 feature -- Basic operations
+
+--	paint
+--			-- Draw the current view when some property like
+--			-- background color changes
+--		do
+--		end
 
 	draw
 			-- Draw the current view.
@@ -405,11 +463,10 @@ feature -- Query
 			result_exists: Result /= Void
 		end
 
-	yes_cursor (a_target: ANY): EV_CURSOR
+	yes_cursor (a_target: ANY): EV_POINTER_STYLE
 			-- Cursor for `a_target'.
 		do
---			Result.make_with_pixmap (
-			create Result
+			create Result.make_with_pixel_buffer (Icon_new_class_color_buffer, 0, 0)
 		end
 
 	no_cursor (a_target: ANY): EV_CURSOR
@@ -418,118 +475,21 @@ feature -- Query
 			create Result
 		end
 
-feature -- Basic operations
-
-	prepick_operations
-			-- Feature called just before a pick-and-put (PNP)
-			-- operation starts (i.e. when a right-click occurs).
-			-- See index clause for information on pick-and-put.
+	linear (a_object: ANY): LINEAR [VIEW]
+			-- List of views in which `a_object' is displayed.  The
+			-- resulting list could be empty.
 		do
-			print (generating_type.name + ".prepick_operations %N")
+			Result := views_table.linear (a_object)
 		end
 
-	postput_operations
-			-- Feature called just after a pick-and-put (PNP)
-			-- operation ends.  The end (either a drop or a cancel)
-			-- of a PNP operations is detected when a mouse-move
-			-- event occurs.)
-			-- See index clause for information on pick-and-put.
+	linear_with_set (a_set: LINEAR [ANY]): LINEAR [VIEW]
+			-- List of views in which any of the objects in `a_set'
+			-- is displayed.
 		do
-			print (generating_type.name + ".postpick_operations %N")
+			Result := views_table.linear_with_set (a_set)
 		end
 
-
-feature {NONE} -- Agents and support (actions)
-
-	is_picking: BOOLEAN_REF
-			-- Is a pick-and-put (PNP) operation in progress?
-			-- It seems the PNP operations intercepts events system-
-			-- wide, so this is a global reference.
-			-- See index clause for information on pick-and-put.
-		once
-			create Result
-		end
-
-	on_prepick_right_click (a_x, a_y, a_button: INTEGER;
-								 a_x_tilt, a_y_tilt, a_pressure: DOUBLE;
-								 a_screen_x, a_screen_y: INTEGER)
-			-- Feature added as agent to `pointer_button_press_actions' to
-			-- react to a right-click in order to call `prepick_operations'
-			-- right before a PNP begins.  (Feature `pick_actions' does not
-			-- allow some views to show their updates until the pebble
-			-- transport is complete.)
-		local
-			lin: like views_table.linear_representation
-			v: VIEW
-		do
-			lin := views_table.linear_representation
-			if a_button = 3 then
-				prepick_operations
---				is_picking.set_item (true)
-				from lin.start
-				until lin.after
-				loop
-					v := lin.item
-					v.pointer_motion_actions.extend (post_pick_move_agent)
-					lin.forth
-				end
-			end
-		end
-
-	frozen on_postput_move (a_x, a_y: INTEGER;
-								 a_x_tilt, a_y_tilt, a_pressure: DOUBLE;
-								 a_screen_x, a_screen_y: INTEGER)
-			-- Feature added as agent to `pointer_motion_actions'
-			-- to react after a pnp operations has ended.  It calls
-			-- feature `postput_operations'.
-			-- Redefine `postput_operations' to clean up any operations
-			-- that occurred in `do_prepick_operations'.
-			-- See index clause for information on pick-and-put.
-		local
-			lin: like views_table.linear_representation
-			v: VIEW
-		do
-			lin := views_table.linear_representation
-			if is_picking.item then
-				postput_operations
-				is_picking.set_item (false)
-					-- Remove this feature (the agent) from move actions
-				from lin.start
-				until lin.after
-				loop
-					v := lin.item
-					v.pointer_motion_actions.prune (post_pick_move_agent)
-					lin.forth
-				end
-			end
-		end
-
-	on_picked (a_x, a_y: INTEGER)
-			-- Do something when a pick happens
-		do
-			is_picking.set_item (true)
-				-- Even though `prepick_operations' executes, the EV_MODELs
-				-- in the views do not reflect changes until he transport is
-				-- over, at which time `on_postput_move' is called reversing
-				-- the changes.  It appears as if nothing changed.
---			prepick_operations
---			is_picking.set_item (true)
---			from views.start
---			until views.after
---			loop
---				list := views.item_for_iteration
---				from list.start
---				until list.after
---				loop
---					v := list.item_for_iteration
---					v.pointer_motion_actions.extend (post_pick_move_agent)
---					list.forth
---				end
---				views.forth
---			end
-		end
-
-	post_pick_move_agent: PROCEDURE [TUPLE [a_x, a_y: INTEGER;
+	frozen post_pick_move_agent: PROCEDURE [TUPLE [a_x, a_y: INTEGER;
 								 a_x_tilt, a_y_tilt, a_pressure: DOUBLE;
 								 a_screen_x, a_screen_y: INTEGER]]
 			-- Creates an agent out of `on_postput_move' which is added to
@@ -542,6 +502,217 @@ feature {NONE} -- Agents and support (actions)
 			Result := agent on_postput_move
 		end
 
+feature -- Basic operations
+
+	target_changed_operations
+			-- This feature is called by `notify_views' to perform
+			-- actions when that view's `target' was modified.
+		do
+			print ("{VIEW}.target_changed_operations %N")
+
+		end
+
+	pick_notified_operations (a_target: ANY)
+			-- React to the pick of `a_target' from some view
+		do
+			print ("{VIEW}.pick_notified_operations on {" + generating_type.name + "}%N")
+
+		end
+
+	pick_ended_operations
+			-- React to the end of a pick and drop operation
+		do
+			print ("{VIEW}.pick_ended_operations on {" + generating_type.name + "} %N")
+
+		end
+
+	child_object_changed_operations (a_target: ANY)
+			-- React to a change of `a_target' in one of the child
+			-- views of Current
+		require
+--			is_parent
+		do
+			print ("VIEW.child_object_changed_operations %N")
+		end
+
+	notify_views (a_target: ANY)
+			-- Inform the views that have `a_target' that `a_target'
+			-- has changed (i.e. call `target_changed_operations' for
+			-- those views).
+			-- This also cleans any "destroyed" views from the `views' set.
+		local
+			lin: LINEAR [VIEW]
+			marks: LINKED_SET [VIEW]	-- Views marked for removal.
+			v: VIEW
+		do
+			create marks.make
+			lin := views_table.linear (a_target)
+			from lin.start
+			until lin.after
+			loop
+				v := lin.item
+				if v.is_destroyed then
+					marks.extend (v)
+				elseif not v.is_draw_disabled then
+					v.target_changed_operations
+				end
+				lin.forth
+			end
+				-- Clean out any views that are no longer usable.
+			from marks.start
+			until marks.exhausted
+			loop
+				views_table.prune (marks.item)
+				marks.forth
+			end
+		end
+
+	notify_parents (a_target: ANY)
+			-- Inform the parent-views of any view that that have\
+			-- `a_target' that `a_target' has changed.
+		local
+			lin: LINEAR [VIEW]
+			marks: LINKED_SET [VIEW]	-- Views marked for removal.
+			v: VIEW
+			pv: VIEW
+		do
+			create marks.make
+			lin := views_table.linear (a_target)
+			from lin.start
+			until lin.after
+			loop
+				v := lin.item
+				if v.has_parent_view then
+					pv := v.parent_view
+					pv.child_object_changed_operations (a_target)
+				end
+				lin.forth
+			end
+				-- Clean out any views that are no longer usable.
+			from marks.start
+			until marks.exhausted
+			loop
+				views_table.prune (marks.item)
+				marks.forth
+			end
+		end
+
+feature {NONE} -- Agents and support (actions)
+
+	frozen on_prepick_right_click (x, y, button: INTEGER;
+								x_tilt, y_tilt, pressure: DOUBLE;
+								screen_x, screen_y: INTEGER)
+			-- Notify the parent of all views that contain `target'
+			-- that a pick event occurred involving `target'.
+		local
+			lin: LINEAR [VIEW]
+			marks: LINKED_SET [VIEW]	-- Views marked for removal.
+			v: VIEW
+		do
+--			is_picking.set_item (true)
+			create marks.make
+			lin := views_table.linear (target)
+			from lin.start
+			until lin.after
+			loop
+				v := lin.item
+				if v.is_destroyed then
+					marks.extend (v)
+				elseif v.has_parent_view then
+						-- Notifiy the parent view of the pick
+					v.parent_view.pick_notified_operations (target)
+						-- Save the view for notification when pick ends
+					pick_notified_views.extend (v.parent_view)
+				end
+				lin.forth
+			end
+				-- Clean out any views that are no longer usable.
+			from marks.start
+			until marks.exhausted
+			loop
+				views_table.prune (marks.item)
+				marks.forth
+			end
+		end
+
+	frozen on_picked (a_x, a_y: INTEGER)
+			-- Notify the parent of all views that contain `target'
+			-- that a pick event occurred involving `target'.
+		local
+			lin: LINEAR [VIEW]
+			marks: LINKED_SET [VIEW]	-- Views marked for removal.
+			v: VIEW
+		do
+			is_picking.set_item (true)
+--			create marks.make
+--			lin := views_table.linear (target)
+--			from lin.start
+--			until lin.after
+--			loop
+--				v := lin.item
+--				if v.is_destroyed then
+--					marks.extend (v)
+--				elseif v.has_parent_view then
+--						-- Notifiy the parent view of the pick
+--					v.parent_view.pick_notified_operations (target)
+--						-- Save the view for notification when pick ends
+--					pick_notified_views.extend (v.parent_view)
+--				end
+--				lin.forth
+--			end
+--				-- Clean out any views that are no longer usable.
+--			from marks.start
+--			until marks.exhausted
+--			loop
+--				views_table.prune (marks.item)
+--				marks.forth
+--			end
+		end
+
+	frozen on_postput_move (a_x, a_y: INTEGER;
+								 a_x_tilt, a_y_tilt, a_pressure: DOUBLE;
+								 a_screen_x, a_screen_y: INTEGER)
+			-- Feature added as agent to `pointer_motion_actions'
+			-- to react after a pnp operations has ended.  It calls
+			-- feature `postput_operations'.
+			-- Redefine `postput_operations' to clean up any operations
+			-- that occurred in `do_prepick_operations'.
+			-- See index clause for information on pick-and-put.
+		local
+ 			v: VIEW
+		do
+			print ("{VIEW}.on_postput_move  on " + generating_type.name + "%N")
+				-- Notify views when a transport has ended.
+			if is_picking.item and then not application.transport_in_progress then
+				print ("%T `is_picking and not transport_in_progress   pick_notified_views.count = " + pick_notified_views.count.out + "%N")
+				is_picking.set_item (false)
+					-- Inform any parent views that the pick has ended
+				from pick_notified_views.start
+				until pick_notified_views.after
+				loop
+					v := pick_notified_views.item
+					v.pick_ended_operations
+					pick_notified_views.forth
+				end
+				pick_notified_views.wipe_out
+			end
+		end
+
+	frozen is_picking: BOOLEAN_REF
+			-- Is a pick-and-put (PNP) operation in progress?
+			-- It seems the PNP operations intercepts events system-
+			-- wide, so this is a global reference.
+			-- See index clause for information on pick-and-put.
+		once
+			create Result
+		end
+
+	pick_notified_views: LINKED_SET [VIEW]
+			-- List of views that were notfied by `on_picked'
+		once
+			create Result.make
+		end
+
 feature -- Action sequences
 
 	pointer_button_press_actions: EV_POINTER_BUTTON_ACTION_SEQUENCE
@@ -551,30 +722,6 @@ feature -- Action sequences
 			-- See index clause for information on pick-and-put.
 		deferred
 		end
---		do
---			create Result
---			check
---				do_not_call: false
---					-- Because this feature should be UNDEFINED and the
---					-- version from {EV_WIDGET} or {EV_MODEL} called.
---			end
---		end
-
-	pointer_button_release_actions: EV_POINTER_BUTTON_ACTION_SEQUENCE
-			-- Actions to be performed when screen pointer button is pressed.
-			-- Defined here as place-holder to be undefined (i.e. joined) to
-			-- the version from {EV_WIDGET} or {EV_MODEL}.
-			-- See index clause for information on pick-and-put.
-		deferred
-		end
---		do
---			create Result
---			check
---				do_not_call: false
---					-- Because this feature should be UNDEFINED and the
---					-- version from {EV_WIDGET} or {EV_MODEL} called.
---			end
---		end
 
 	pointer_motion_actions: EV_POINTER_MOTION_ACTION_SEQUENCE
 			-- Actions to be performed when screen pointer moves.
@@ -583,14 +730,6 @@ feature -- Action sequences
 			-- See index clause for information on pick-and-put.
 		deferred
 		end
---		do
---			create Result
---			check
---				do_not_call: false
---					-- Because this feature should be UNDEFINED and the
---					-- version from {EV_WIDGET} or {EV_MODEL} called.
---			end
---		end
 
 	pick_actions: EV_PND_START_ACTION_SEQUENCE
 			-- Actions to be performed when `pebble' is picked up.
@@ -598,14 +737,11 @@ feature -- Action sequences
 			-- {EV_WIDGET} or {EV_MODEL}.
 		deferred
 		end
---		do
---			create Result
---			check
---				do_not_call: false
---					-- Because this feature should be UNDEFINED and the
---					-- version from {EV_WIDGET} or {EV_MODEL} called.
---			end
---		end
+
+	drop_actions: EV_PND_ACTION_SEQUENCE	--EV_PND_START_ACTION_SEQUENCE
+			-- Actions to be performed when a pebble is dropped here.
+		deferred
+		end
 
 feature {NONE} -- Implementation
 
@@ -639,6 +775,9 @@ feature {NONE} -- Implemetation
 		once
 			create Result
 		end
+
+	parent_view_imp: detachable VIEW
+			-- Detachable implementation of `parent_view'
 
 invariant
 

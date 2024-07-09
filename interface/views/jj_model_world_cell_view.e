@@ -26,8 +26,7 @@ inherit
 			is_in_default_state
 		redefine
 			create_interface_objects,
-			initialize,
-			world
+			initialize
 		end
 
 create
@@ -41,7 +40,7 @@ feature {NONE} -- Initialization
 			-- in order to adhere to void-safety due to the implementation bridge pattern.
 		do
 				-- Must create `world' because not calling `make_with_world'
-			create world.make (target)
+			create world
 			Precursor {EV_MODEL_WORLD_CELL}
 			Precursor {VIEW}
 			is_autoscroll_enabled := true
@@ -54,10 +53,15 @@ feature {NONE} -- Initialization
 			Precursor {VIEW}
 		end
 
-feature -- Access
+feature -- Basic operations
 
-	world: JJ_MODEL_WORLD_VIEW
-			-- The world of models shown in Current
+	add_model (a_model: JJ_MODEL_WORLD_VIEW)
+			-- Add `a_model' to the `world' and set
+			-- the `parent' of `a_model'
+		do
+			world.extend (a_model)
+			a_model.set_parent_view (Current)
+		end
 
 feature {NONE} -- Drawing / Refresh operations
 

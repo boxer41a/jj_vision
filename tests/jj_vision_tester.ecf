@@ -9,7 +9,7 @@
 			<concurrency support="none"/>
 			<void_safety use="all"/>
 		</capability>
-		<library name="base" location="$ISE_LIBRARY\library\base\base-safe.ecf">
+		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf">
 			<option>
 				<assertions precondition="true"/>
 			</option>
@@ -24,13 +24,13 @@
 				<assertions precondition="true"/>
 			</option>
 		</library>
-		<library name="vision2" location="$ISE_LIBRARY\library\vision2\vision2-safe.ecf">
+		<library name="vision2" location="$ISE_LIBRARY\library\vision2\vision2.ecf">
 			<option>
 				<assertions precondition="true"/>
 			</option>
 		</library>
-		<library name="wel" location="$ISE_LIBRARY\library\wel\wel-safe.ecf"/>
-		<cluster name="bitmaps" location="$JJ_SOURCE\jj_bitmaps\classes\" recursive="true"/>
+		<library name="wel" location="$ISE_LIBRARY\library\wel\wel.ecf"/>
+		<cluster name="bitmaps" location="$JJ_GITHUB\jj_bitmaps\classes\" recursive="true"/>
 		<cluster name="tests" location=".\" recursive="true">
 			<file_rule>
 				<exclude>/.git$</exclude>

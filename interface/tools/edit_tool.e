@@ -71,7 +71,6 @@ feature {NONE} -- Initialization
 			create new_date_field_item
 				-- Use default schema at first
 			create schema
-			Precursor {TOOL}
 		end
 
 	initialize

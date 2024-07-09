@@ -60,7 +60,7 @@ feature {NONE} -- Initialization
 			Precursor {EV_MODEL_WORLD}
 		end
 
-feature -- Access
+feature -- Element change
 
 	parent: detachable EV_CONTAINER
 			-- Parent of the current view.

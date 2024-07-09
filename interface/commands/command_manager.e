@@ -164,6 +164,7 @@ feature -- Basic operations
 				-- Get a view so the views with the objects changed
 				-- by executing the command can be updated.
 			v := main_windows.first
+--			v.notify_views_with_set (c.affected_objects)
 			v.draw_views_with_set (c.affected_objects)
 				-- Call `set_widget_states' to update the undo, redo, and save, etc. buttons.
 			main_windows.do_all (agent {JJ_MAIN_WINDOW}.set_widget_states)
@@ -187,6 +188,7 @@ feature -- Basic operations
 				-- Need to get a view so the views with the objects changed
 				-- by undoing the command can be updated.
 			v := main_windows.first
+--			v.notify_views_with_set (c.affected_objects)
 			v.draw_views_with_set (c.affected_objects)
 				-- Call `set_widget_states' to update the undo, redo, and save, etc. buttons.
 			main_windows.do_all (agent {JJ_MAIN_WINDOW}.set_widget_states)

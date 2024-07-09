@@ -10,6 +10,7 @@ inherit
 
 	JJ_APPLICATION
 		redefine
+			target,
 			window_anchor
 --			target_anchor
 		end
@@ -17,8 +18,11 @@ inherit
 create
 	make_and_launch
 
---	target: detachable TEST_RECORD
---			-- For testing
+
+feature -- Access
+
+	target: TEST_RECORD
+			-- For testing
 
 feature {NONE} -- Implementation (anchors)
 

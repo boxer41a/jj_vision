@@ -130,14 +130,14 @@ feature -- Element change
 		do
 				-- Save the old `record'
 			if attached schema_imp as s and then s /= a_schema then
-				target_set.prune (s)
+--				target_set.prune (s)
 				schema_imp := a_schema
-				target_set.extend (s)
+--				target_set.extend (s)
 				draw
 			end
 		ensure
 			schema_assigned: schema = a_schema
-			contains_schema: target_set.has (a_schema)
+--			contains_schema: target_set.has (a_schema)
 --			old_schema_removed: (old schema /= Void) and (old schema /= schema) implies not target_set.has (old schema)
 		end
 
@@ -146,7 +146,7 @@ feature -- Basic operations
 	draw
 			-- Rebuild and show the view.
 		do
-			if schema /= Void then
+			if has_schema then
 				if is_rebuild_needed then
 					build_controls
 				end

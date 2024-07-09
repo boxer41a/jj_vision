@@ -2,7 +2,7 @@
 <system xmlns="http://www.eiffel.com/developers/xml/configuration-1-21-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-21-0 http://www.eiffel.com/developers/xml/configuration-1-21-0.xsd" name="jj_vision" uuid="05FBD1A9-3ED5-4BB2-8507-ABC8AE2867AC" library_target="jj_vision">
 	<target name="jj_vision">
 		<root all_classes="true"/>
-		<option warning="warning" full_class_checking="true" is_attached_by_default="true" syntax="standard" void_safety="all" manifest_array_type="mismatch_warning">
+		<option warning="warning" full_class_checking="true" is_attached_by_default="true" syntax="standard" manifest_array_type="mismatch_warning">
 		</option>
 		<setting name="total_order_on_reals" value="true"/>
 		<setting name="dead_code_removal" value="feature"/>
@@ -10,7 +10,7 @@
 			<void_safety support="all" use="all"/>
 		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
-		<library name="jj_temporal" location="$JJ_GITHUB\jj_temporal\jj_temporal.ecf" readonly="false"/>
+		<library name="jj_temporal" location="\Users\jjj\jj_github\jj_temporal\jj_temporal.ecf"/>
 		<library name="vision2" location="$ISE_LIBRARY\library\vision2\vision2.ecf"/>
 		<cluster name="jj_vision" location=".\" recursive="true">
 			<file_rule>

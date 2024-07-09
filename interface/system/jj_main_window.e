@@ -123,8 +123,9 @@ feature {NONE} -- Initialization
 			show_menu
 				-- Create and add the toolbar.
 			build_main_window_tool_bar
-			upper_bar.extend (create {EV_HORIZONTAL_SEPARATOR})
+--			upper_bar.extend (create {EV_HORIZONTAL_SEPARATOR})
 			upper_bar.extend (jj_tool_bar_box)
+			upper_bar.disable_item_expand (jj_tool_bar_box)
 			upper_bar.extend (create {EV_HORIZONTAL_SEPARATOR})
 				-- Create and add the status bar.
 --			build_standard_status_bar
@@ -151,14 +152,14 @@ feature {NONE} -- Initialization
 				-- add actions to window
 			close_request_actions.extend (agent on_close_window)
 				-- add actions to File menu items
-			file_new_target_item.select_actions.extend (agent on_make_new_target)
+--			file_new_target_item.select_actions.extend (agent on_make_new_target)
 			file_open_item.select_actions.extend (agent on_file_open)
 			file_save_item.select_actions.extend (agent on_file_save)
 			file_exit_item.select_actions.extend (agent on_exit)
 				-- add actions to the Tool menu items
 			tool_preferences_item.select_actions.extend (agent on_show_preferences_dialog)
 				-- add actions to Window menu items
-			window_new_item.select_actions.extend (agent on_make_new_window)
+--			window_new_item.select_actions.extend (agent on_make_new_window)
 			window_maximize_all_item.select_actions.extend (agent on_maximize_all)
 			window_minimize_all_item.select_actions.extend (agent on_minimize_all)
 			window_raise_all_item.select_actions.extend (agent on_raise_all)
@@ -174,7 +175,7 @@ feature {NONE} -- Initialization
 			undo_button.select_actions.extend (agent command_manager.undo)
 			redo_button.select_actions.extend (agent command_manager.execute)
 			new_window_button.drop_actions.extend (agent on_drop_in_new_window)
-			new_window_button.select_actions.extend (agent on_make_new_window)
+--			new_window_button.select_actions.extend (agent on_make_new_window)
 			minimize_all_button.select_actions.extend (agent on_minimize_all)
 			raise_all_button.select_actions.extend (agent on_raise_all)
 --			preferences_button.select_actions.extend (agent on_show_preferences_window)
@@ -405,21 +406,18 @@ feature -- Basic operations
 		do
 				-- This simply puts the `display_name' (from EDITABLE) or `generating_type' of
 				-- the `target' into the title bar of the window.
-			check attached {JJ_APPLICATION} (create {EV_ENVIRONMENT}).application as app then
-					-- Because {JJ_MAIN_WINDOW} (this class) is for use in a {JJ_APPLICATION}.
-				s := app.generating_type + ":  "
-				if not is_view_empty then
-					if attached {EDITABLE} target as e then
-						s := s + e.display_name.to_string_8
-					else
-						s := s + target.generating_type.name
-					end
+			s := application.generating_type + ":  "
+			if not is_view_empty then
+				if attached {EDITABLE} target as e then
+					s := s + e.display_name.to_string_8
 				else
-					s := s + "Empty"
+					s := s + target.generating_type.name
 				end
-				set_title (s)
-				set_widget_states
+			else
+				s := s + "Empty"
 			end
+			set_title (s)
+			set_widget_states
 		end
 
 	frozen ask_to_save
@@ -599,15 +597,15 @@ feature {NONE} -- Actions
 --			end
 		end
 
-	on_make_new_window
-			-- Create a new JJ_MAIN_WINDOW (like Current) and
-			-- target it to the same `system'.
-		local
-			w: like Current
-		do
-			create w.make (target)
-			w.show
-		end
+--	on_make_new_window
+--			 Create a new JJ_MAIN_WINDOW (like Current) and
+--			 target it to the same `system'.
+--		local
+--			w: like Current
+--		do
+--			create w.make (target)
+--			w.show
+--		end
 
 	on_exit
 			-- End the execution, insuring to save unsaved targets.
