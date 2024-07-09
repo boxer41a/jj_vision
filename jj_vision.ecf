@@ -10,7 +10,7 @@
 			<void_safety support="all" use="all"/>
 		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
-		<library name="jj_temporal" location="\Users\jjj\jj_github\jj_temporal\jj_temporal.ecf"/>
+		<library name="jj_temporal" location="$JJ_GITHUB\jj_temporal\jj_temporal.ecf"/>
 		<library name="vision2" location="$ISE_LIBRARY\library\vision2\vision2.ecf"/>
 		<cluster name="jj_vision" location=".\" recursive="true">
 			<file_rule>
