@@ -22,13 +22,19 @@ inherit
 feature -- Access, restricted to descendants
 
 	main_windows: LINKED_LIST [JJ_MAIN_WINDOW]
-			-- List of all open JJ_MAIN_WINDOWs
+			-- List of all open {JJ_MAIN_WINDOW}s
 		once
 			create Result.make
 		end
 
 	command_manager: COMMAND_MANAGER
 			-- Used to undo/redo commands for this system
+		once
+			create Result
+		end
+
+	view_manager: VIEW_MANAGER
+			-- Access to {VIEW}s in use in the application
 		once
 			create Result
 		end

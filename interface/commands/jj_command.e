@@ -51,6 +51,7 @@ feature -- Basic operations
 		require
 			executable: is_executable
 		do
+				-- Current adds itself to the command manager
 			was_executed := True
 		end
 
@@ -63,7 +64,10 @@ feature -- Basic operations
 		end
 
 	affected_objects: LINKED_SET [ANY]
-			-- List of object whose views must be updated
+			-- List of objects that executing this command affects, which
+			-- can be used for other actions, such as updating views that
+			-- contain these objects.
+			-- Descendants should add to this set as needed.
 		do
 			Result := affected_objects_imp
 		end

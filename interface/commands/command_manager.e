@@ -93,6 +93,7 @@ feature -- Element change
 			-- to the list and execute it.
 		require
 			not_has_command: not has (a_command)
+			is_executed: a_command.was_executed
 		do
 			from go_i_th (last_executed_index + 1)
 			until after or else is_empty
@@ -100,13 +101,13 @@ feature -- Element change
 				remove
 			end
 			extend (a_command)
-			execute
+--			execute
 			check
 				last_executed_index = index_of (a_command, 1)
 			end
 		ensure
 			command_added: has (a_command)
-			command_executed: last_executed_index = count
+			last_added: last_executed_index = count
 		end
 
 	set_mark
@@ -154,7 +155,6 @@ feature -- Basic operations
 		require
 			can_execute_a_command: is_executable
 		local
-			v: VIEW
 			c: JJ_COMMAND
 		do
 			last_executed_index := last_executed_index + 1
@@ -163,9 +163,9 @@ feature -- Basic operations
 --			Persistence_manager.extend_objects (c.affected_objects)
 				-- Get a view so the views with the objects changed
 				-- by executing the command can be updated.
-			v := main_windows.first
---			v.notify_views_with_set (c.affected_objects)
-			v.draw_views_with_set (c.affected_objects)
+--			view_manager.notify_views_with_set (c.affected_objects)
+			view_manager.draw_views_with_set (c.affected_objects)
+			view_manager.notify_parents_with_set (c.affected_objects)
 				-- Call `set_widget_states' to update the undo, redo, and save, etc. buttons.
 			main_windows.do_all (agent {JJ_MAIN_WINDOW}.set_widget_states)
 		ensure
@@ -177,7 +177,7 @@ feature -- Basic operations
 		require
 			can_undo_a_command: is_undoable
 		local
-			v: VIEW
+--			v: VIEW
 			c: JJ_COMMAND
 		do
 				-- Get the command at the current index and undo it.
@@ -187,9 +187,9 @@ feature -- Basic operations
 --			persistence_manager.extend_objects (c.affected_objects)
 				-- Need to get a view so the views with the objects changed
 				-- by undoing the command can be updated.
-			v := main_windows.first
+--			v := main_windows.first
 --			v.notify_views_with_set (c.affected_objects)
-			v.draw_views_with_set (c.affected_objects)
+			view_manager.draw_views_with_set (c.affected_objects)
 				-- Call `set_widget_states' to update the undo, redo, and save, etc. buttons.
 			main_windows.do_all (agent {JJ_MAIN_WINDOW}.set_widget_states)
 		ensure

@@ -230,24 +230,24 @@ feature -- Element change
 				-- Remove the old association
 			if attached target_imp and then target /= a_target then
 				check
-					has_associated_view: views_table.has (target)
+					has_associated_view: view_manager.has (target)
 						-- because `target_imp' not Void and `make'
 				end
-				views_table.prune (Current)
+				view_manager.prune (Current)
 				target_imp := Void
 			end
 			if target_imp = Void then
 					-- the expected case, except of initial creation
 --				print ("VIEW.set_target:  if statement target_imp = Void %N")
 				target_imp := a_target
-				views_table.extend (Current)
-			elseif not views_table.has_view (Current) then
+				view_manager.extend (Current)
+			elseif not view_manager.has_view (Current) then
 --				print ("VIEW.set_target:  not views_table.has (Current) %N")
 				check
 					same_object: target_imp = a_target
 						-- because of assignment statement in `make'
 				end
-				views_table.extend (Current)
+				view_manager.extend (Current)
 			end
 			draw
 		ensure
@@ -284,112 +284,21 @@ feature -- Basic operations
 		do
 		end
 
-	draw_other_views (a_target: ANY)
-			-- Draw all views that contain `a_target' except Current
-			-- This also cleans any "destroyed" views from the `views' set.
-		require
-			target_exists: a_target /= Void
-		local
-			b: BOOLEAN
-		do
-			b := is_draw_disabled
-			disable_drawing
-			draw_views (a_target)
-			if not b then
-				enable_drawing
-			end
-		end
-
-	draw_views (a_target: ANY)
-			-- Draw the views which contain `a_target'.
-		local
-			lin: LINEAR [VIEW]
-			marks: LINKED_SET [VIEW]	-- Views marked for removal.
-			v: VIEW
-		do
-			create marks.make
-			lin := views_table.linear (a_target)
-			from lin.start
-			until lin.after
-			loop
-				v := lin.item
-				if v.is_destroyed then
-					marks.extend (v)
-				elseif not v.is_draw_disabled then
-					v.draw
-				end
-				lin.forth
-			end
-				-- Clean out any views that are no longer usable.
-			from marks.start
-			until marks.exhausted
-			loop
-				views_table.prune (marks.item)
-				marks.forth
-			end
-		end
-
-	draw_views_with_set (a_set: LINEAR [ANY])
-			-- Draw the views which contain any of the objects in `a_set'.
-			-- This also cleans any "destroyed" views from the `views' set.
-		require
-			set_exists: a_set /= Void
-		local
-			lin: LINEAR [VIEW]
-			marks: LINKED_SET [VIEW]	-- Views marked for removal.
-			v: VIEW
-		do
-			create marks.make
-			lin := views_table.linear_with_set (a_set)
-			from lin.start
-			until lin.after
-			loop
-				v := lin.item
-				if v.is_destroyed then
-					marks.extend (v)
-				elseif not v.is_draw_disabled then
-					v.draw
-				end
-				lin.forth
-			end
-				-- Clean out any views that are no longer usable.
-			from marks.start
-			until marks.exhausted
-			loop
-				views_table.prune (marks.item)
-				marks.forth
-			end
-		end
-
-	draw_all_views
-			-- Draw *all* the views in the system.
-			-- Also cleans any "destroyed" views for the `views' set.
-		local
-			lin: LINEAR [VIEW]
-			marks: LINKED_SET [VIEW]	-- Views marked for removal.
-			v: VIEW
-		do
-			create marks.make
-			lin := views_table.linear_representation
-			from lin.start
-			until lin.after
-			loop
-				v := lin.item
-				if v.is_destroyed then
-					marks.extend (v)
-				elseif not v.is_draw_disabled then
-					v.draw
-				end
-				lin.forth
-			end
-				-- Clean out any views that are no longer usable.
-			from marks.start
-			until marks.exhausted
-			loop
-				views_table.prune (marks.item)
-				marks.forth
-			end
-		end
+--	draw_other_views (a_target: ANY)
+--			-- Draw all views that contain `a_target' except Current
+--			-- This also cleans any "destroyed" views from the `views' set.
+--		require
+--			target_exists: a_target /= Void
+--		local
+--			b: BOOLEAN
+--		do
+--			b := is_draw_disabled
+--			disable_drawing
+--			draw_views (a_target)
+--			if not b then
+--				enable_drawing
+--			end
+--		end
 
 feature -- Status report
 
@@ -475,20 +384,6 @@ feature -- Query
 			create Result
 		end
 
-	linear (a_object: ANY): LINEAR [VIEW]
-			-- List of views in which `a_object' is displayed.  The
-			-- resulting list could be empty.
-		do
-			Result := views_table.linear (a_object)
-		end
-
-	linear_with_set (a_set: LINEAR [ANY]): LINEAR [VIEW]
-			-- List of views in which any of the objects in `a_set'
-			-- is displayed.
-		do
-			Result := views_table.linear_with_set (a_set)
-		end
-
 	frozen post_pick_move_agent: PROCEDURE [TUPLE [a_x, a_y: INTEGER;
 								 a_x_tilt, a_y_tilt, a_pressure: DOUBLE;
 								 a_screen_x, a_screen_y: INTEGER]]
@@ -535,68 +430,6 @@ feature -- Basic operations
 			print ("VIEW.child_object_changed_operations %N")
 		end
 
-	notify_views (a_target: ANY)
-			-- Inform the views that have `a_target' that `a_target'
-			-- has changed (i.e. call `target_changed_operations' for
-			-- those views).
-			-- This also cleans any "destroyed" views from the `views' set.
-		local
-			lin: LINEAR [VIEW]
-			marks: LINKED_SET [VIEW]	-- Views marked for removal.
-			v: VIEW
-		do
-			create marks.make
-			lin := views_table.linear (a_target)
-			from lin.start
-			until lin.after
-			loop
-				v := lin.item
-				if v.is_destroyed then
-					marks.extend (v)
-				elseif not v.is_draw_disabled then
-					v.target_changed_operations
-				end
-				lin.forth
-			end
-				-- Clean out any views that are no longer usable.
-			from marks.start
-			until marks.exhausted
-			loop
-				views_table.prune (marks.item)
-				marks.forth
-			end
-		end
-
-	notify_parents (a_target: ANY)
-			-- Inform the parent-views of any view that that have\
-			-- `a_target' that `a_target' has changed.
-		local
-			lin: LINEAR [VIEW]
-			marks: LINKED_SET [VIEW]	-- Views marked for removal.
-			v: VIEW
-			pv: VIEW
-		do
-			create marks.make
-			lin := views_table.linear (a_target)
-			from lin.start
-			until lin.after
-			loop
-				v := lin.item
-				if v.has_parent_view then
-					pv := v.parent_view
-					pv.child_object_changed_operations (a_target)
-				end
-				lin.forth
-			end
-				-- Clean out any views that are no longer usable.
-			from marks.start
-			until marks.exhausted
-			loop
-				views_table.prune (marks.item)
-				marks.forth
-			end
-		end
-
 feature {NONE} -- Agents and support (actions)
 
 	frozen on_prepick_right_click (x, y, button: INTEGER;
@@ -611,7 +444,7 @@ feature {NONE} -- Agents and support (actions)
 		do
 --			is_picking.set_item (true)
 			create marks.make
-			lin := views_table.linear (target)
+			lin := view_manager.linear (target)
 			from lin.start
 			until lin.after
 			loop
@@ -630,7 +463,7 @@ feature {NONE} -- Agents and support (actions)
 			from marks.start
 			until marks.exhausted
 			loop
-				views_table.prune (marks.item)
+				view_manager.prune (marks.item)
 				marks.forth
 			end
 		end
@@ -770,11 +603,11 @@ feature {NONE} -- Implemetation
 	target_imp: detachable ANY
 			-- Detachable implementation of `target' for void safety
 
-	views_table: VIEW_TARGET_TABLE
-			-- Global table associating objects to views
-		once
-			create Result
-		end
+--	views_table: VIEW_MANAGER
+--			-- Global table associating objects to views
+--		once
+--			create Result
+--		end
 
 	parent_view_imp: detachable VIEW
 			-- Detachable implementation of `parent_view'

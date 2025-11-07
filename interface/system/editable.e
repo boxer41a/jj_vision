@@ -79,7 +79,7 @@ feature -- Element change
 			w: JJ_MAIN_WINDOW
 		do
 			schema.set_identifying_field (a_field)
-				-- Because `target_label_field' is posibly used by all views, when it changes
+				-- Because `target_label_field' is possibly used by all views, when it changes
 				-- all views must be updated because there is no way for the view to know
 				-- if it contains `target_label_field'.  Originally `target_label_field'
 				-- was added to the views using `add_object' (see VIEW), but using a FIELD
@@ -90,7 +90,7 @@ feature -- Element change
 					-- because only JJ_APPLICATIONS should use this.  really ???
 				-- Get hold of any VIEW; `first_window' will work.
 				w := a.first_window
-				w.draw_all_views
+				w.view_manager.draw_all_views
 			end
 		end
 
