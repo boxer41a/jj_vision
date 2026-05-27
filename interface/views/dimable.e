@@ -19,8 +19,8 @@ feature -- Initialization
 	default_create
 			-- Set the default `dimming_level'
 		do
-			dimming_level := Dimmer
-			previous_dimming_level := Dimmest
+			create previous_levels.make (10)
+			dimming_level := Normal
 		end
 
 feature -- Access
@@ -28,9 +28,6 @@ feature -- Access
 	dimming_level: INTEGER_32
 			-- The amount colors will be dimmed
 			-- (One of `Dim', `Dimmer', or `Dimmest')
-
-	previous_dimming_level: INTEGER_32
-			-- Used to `restore' to the prior dimming level
 
 	Bright: INTEGER = 0
 	Normal: INTEGER_32 = 7
@@ -54,19 +51,26 @@ feature -- Element change
 --			end
 --			io.put_string (" from " + previous_dimming_level.out)
 --			io.put_string ("  to " + dimming_level.out + "%N")
-			previous_dimming_level := dimming_level
+			previous_levels.put (dimming_level)
 			dimming_level := a_level
 		end
 
-feature -- Basic operations
-
 	restore_dimming_level
 			-- Set the `dimming_level' to the `previous_dimming_level'
+		require
+			is_restorable: is_level_restorable
 		do
-			set_dimming_level (previous_dimming_level)
+			dimming_level := previous_levels.item
+			previous_levels.remove
 		end
 
 feature -- Status report
+
+	is_level_restorable: BOOLEAN
+			-- Can the `dimming_level' be restored to a previous setting?
+		do
+			Result := not previous_levels.is_empty
+		end
 
 	is_bright: BOOLEAN
 			-- Should the resulting colors be "bright"?
@@ -169,6 +173,9 @@ feature -- Query
 		end
 
 feature {NONE} -- Implementation
+
+	previous_levels: ARRAYED_STACK [like dimming_level]
+			-- Hold previouse dimming levels
 
 	fader: COLOR_FADER
 			-- Used to calculate a new color based on some initial color and dimming level

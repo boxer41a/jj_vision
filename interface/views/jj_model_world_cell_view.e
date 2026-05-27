@@ -1,7 +1,7 @@
 note
 	description	: "[
 		A scrollable drawing area (i.e. an {EV_MODEL_WORLD_CELL} that 
-		is a {VIEW}.
+		is a scrollable {VIEW}.
 		]"
 	author:		"Jimmy J. Johnson"
 
@@ -30,6 +30,7 @@ inherit
 		end
 
 create
+	default_create,
 	make
 
 feature {NONE} -- Initialization

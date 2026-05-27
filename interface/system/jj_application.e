@@ -103,7 +103,7 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	target: ANY
+	target: like target_anchor
 			-- The top/main object handled by this application
 
 	frozen first_window: like window_anchor
@@ -198,6 +198,19 @@ feature {NONE} -- Implementation
 			-- To be used as file name of file containing the `state'.
 
 feature {NONE} -- Implementation (anchors)
+
+	target_anchor: ANY
+			-- Anchor for features using nodes.
+			-- Not to be called; just used to anchor types.
+			-- Declared as a feature to avoid adding an attribute.
+		require else
+			not_callable: False
+		do
+			check
+				do_not_call: False then
+					-- Because give no info; simply used as anchor.
+			end
+		end
 
 	window_anchor: JJ_MAIN_WINDOW
 			-- Anchor for the type of `first_window'

@@ -4,10 +4,12 @@ note
 		It is a group of figures that allow redraws through the {VIEW}
 		class interface (e.g. when the underlying object model changes,
 		the views displaying that object can be redrawn.)
+		
+		Add objects (i.e. other MODELs) by calling `extend' on feature
+		`world' from Current.
 	]"
 	author: "Jimmy J. Johnson"
 	date: "$Date$"
-	revision: "$Revision$"
 
 class
 	JJ_MODEL_WORLD_VIEW

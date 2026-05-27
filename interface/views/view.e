@@ -24,12 +24,12 @@ deferred class
 
 inherit
 
-	DIMABLE
-		undefine
-			default_create
-		redefine
-			set_dimming_level
-		end
+--	DIMABLE
+--		undefine
+--			default_create
+--		redefine
+--			set_dimming_level
+--		end
 
 	SHARED
 		undefine
@@ -82,8 +82,8 @@ feature {NONE} -- Initialization
 			view_not_initialized: not is_view_initialized
 		do
 --			initialize_dimable
-			dimming_level := Dim
-			previous_dimming_level := Dimmer
+--			dimming_level := Dim
+--			previous_dimming_level := Dimmer
 			add_actions
 			is_view_initialized := True
 		ensure
@@ -95,9 +95,11 @@ feature {NONE} -- Initialization
 		require
 			not_initialized: not is_view_initialized
 		do
-			pointer_button_press_actions.extend (agent on_prepick_right_click)
-			pick_actions.extend (agent on_picked)
-			pointer_motion_actions.extend (agent on_postput_move)
+--			pointer_button_press_actions.extend (agent on_button_press)  --on_prepick_right_click)
+--			pointer_button_release_actions.extend (agent on_button_release)
+--			pick_actions.extend (agent on_picked)
+--			pointer_motion_actions.extend (agent on_postput_move)
+--			pick_actions.extend (agent on_picked)
 		end
 
 feature -- Status report
@@ -261,12 +263,12 @@ feature -- Element change
 			parent_view_imp := a_view
 		end
 
-	set_dimming_level (a_level: like dimming_level)
-			-- Change the `dimming_level'
-		do
-			Precursor (a_level)
---			paint
-		end
+--	set_dimming_level (a_level: like dimming_level)
+--			-- Change the `dimming_level'
+--		do
+--			Precursor (a_level)
+----			paint
+--		end
 
 feature -- Basic operations
 
@@ -430,7 +432,141 @@ feature -- Basic operations
 			print ("VIEW.child_object_changed_operations %N")
 		end
 
+	on_notify_button_pressed (a_x, a_y, a_button: INTEGER; a_widget: VIEW)
+			-- Action to be preformed when notified that a button was pressed
+			-- on the Current widget
+		do
+			print ("{" + generating_type.name + "}. on_notify_button_pressed:  button number " + a_button.out)
+			print ("  on " + a_widget.generating_type.name)
+			print ("  at (" + a_x.out + ", " + a_y.out + ")  %N")
+
+		end
+
+	left_button_notify_actions (a_x, a_y: INTEGER; a_widget: VIEW)
+			-- Action to be preformed when notified that a button was pressed
+			-- on the Current widget
+		do
+			print ("{" + generating_type.name + "}.left_button_notify_actions:  ")
+			print ("  on " + a_widget.generating_type.name)
+			print ("  at (" + a_x.out + ", " + a_y.out + ")  %N")
+		end
+
+	left_button_release_notify_actions (a_x, a_y: INTEGER; a_widget: VIEW)
+			-- Action to be preformed when notified that a button was pressed
+			-- on the Current widget
+		do
+			print ("{" + generating_type.name + "}.left_button_release_notify_actions:  ")
+			print ("  on " + a_widget.generating_type.name)
+			print ("  at (" + a_x.out + ", " + a_y.out + ")  %N")
+		end
+
+	right_button_notify_actions (a_x, a_y:INTEGER; a_widget: VIEW)
+			-- Action to be preformed when notified that a button was pressed
+			-- on the Current widget
+		do
+			print ("{" + generating_type.name + "}.right_button_notify_actions:  ")
+			print ("  on " + a_widget.generating_type.name)
+			print ("  at (" + a_x.out + ", " + a_y.out + ")  %N")
+
+		end
+
+	right_button_release_notify_actions (a_x, a_y: INTEGER; a_widget: VIEW)
+			-- Action to be preformed when notified that a button was released
+			-- on the Current widget
+		do
+			print ("{" + generating_type.name + "}.left_button_release_notify_actions:  ")
+			print ("  on " + a_widget.generating_type.name)
+			print ("  at (" + a_x.out + ", " + a_y.out + ")  %N")
+		end
+
+
+
 feature {NONE} -- Agents and support (actions)
+
+--	frozen on_button_press (a_x, a_y, a_button: INTEGER;
+--								x_tilt, y_tilt, pressure: DOUBLE;
+--								screen_x, screen_y: INTEGER)
+--			-- Notify the parent that a button was pressed.
+--		local
+--			lin: LINEAR [VIEW]
+--			marks: LINKED_SET [VIEW]	-- Views marked for removal.
+--			v: VIEW
+--		do
+--			print ("{" + generating_type.name + "}.on_button_pressed:  button = " + a_button.out + " %N")
+----			is_picking.set_item (true)
+--			create marks.make
+--			lin := view_manager.linear (target)
+--			from lin.start
+--			until lin.after
+--			loop
+--				v := lin.item
+--				if v.is_destroyed then
+--					marks.extend (v)
+--				elseif v.has_parent_view then
+--						-- Notifiy the parent view of the pick
+--					if a_button = 1 then
+--						v.parent_view.left_button_notify_actions (a_x, a_y, Current)
+--					elseif a_button = 3 then
+--						v.parent_view.right_button_notify_actions (a_x, a_y, Current)
+--					end
+----					v.parent_view.on_notify_button_pressed (a_x, a_y, a_button, Current)
+----					v.parent_view.pick_notified_operations (target)
+--						-- Save the view for notification when pick ends
+----					pick_notified_views.extend (v.parent_view)
+--				end
+--				lin.forth
+--			end
+--				-- Clean out any views that are no longer usable.
+--			from marks.start
+--			until marks.exhausted
+--			loop
+--				view_manager.prune (marks.item)
+--				marks.forth
+--			end
+--		end
+
+	frozen on_button_release (a_x, a_y, a_button: INTEGER;
+								x_tilt, y_tilt, pressure: DOUBLE;
+								screen_x, screen_y: INTEGER)
+			-- Notify the parent that a button was pressed.
+		local
+			lin: LINEAR [VIEW]
+			marks: LINKED_SET [VIEW]	-- Views marked for removal.
+			v: VIEW
+		do
+			print ("{" + generating_type.name + "}.on_button_released:  button = " + a_button.out + " %N")
+--			is_picking.set_item (true)
+			create marks.make
+			lin := view_manager.linear (target)
+			from lin.start
+			until lin.after
+			loop
+				v := lin.item
+				if v.is_destroyed then
+					marks.extend (v)
+				elseif v.has_parent_view then
+						-- Notifiy the parent view of the pick
+					if a_button = 1 then
+						v.parent_view.left_button_release_notify_actions (a_x, a_y, Current)
+					elseif a_button = 3 then
+						v.parent_view.right_button_release_notify_actions (a_x, a_y, Current)
+					end
+--					v.parent_view.on_notify_button_pressed (a_x, a_y, a_button, Current)
+--					v.parent_view.pick_notified_operations (target)
+						-- Save the view for notification when pick ends
+--					pick_notified_views.extend (v.parent_view)
+				end
+				lin.forth
+			end
+				-- Clean out any views that are no longer usable.
+			from marks.start
+			until marks.exhausted
+			loop
+				view_manager.prune (marks.item)
+				marks.forth
+			end
+		end
+
 
 	frozen on_prepick_right_click (x, y, button: INTEGER;
 								x_tilt, y_tilt, pressure: DOUBLE;
@@ -442,6 +578,7 @@ feature {NONE} -- Agents and support (actions)
 			marks: LINKED_SET [VIEW]	-- Views marked for removal.
 			v: VIEW
 		do
+			print ("{" + generating_type.name + "}. on_prepick_right_click:  button = " + button.out + " %N")
 --			is_picking.set_item (true)
 			create marks.make
 			lin := view_manager.linear (target)
@@ -468,7 +605,8 @@ feature {NONE} -- Agents and support (actions)
 			end
 		end
 
-	frozen on_picked (a_x, a_y: INTEGER)
+--	frozen on_picked (a_x, a_y: INTEGER)
+	frozen on_picked (a_x, a_y: INTEGER_32)
 			-- Notify the parent of all views that contain `target'
 			-- that a pick event occurred involving `target'.
 		local
@@ -476,6 +614,8 @@ feature {NONE} -- Agents and support (actions)
 			marks: LINKED_SET [VIEW]	-- Views marked for removal.
 			v: VIEW
 		do
+--			print ("{" + generating_type.name + "}. on_picked:  at (" + a_x.out + ", " + a_y.out + ") N")
+			print ("{" + generating_type.name + "}. on_picked:  target = " + target.generating_type.name + "N")
 			is_picking.set_item (true)
 --			create marks.make
 --			lin := views_table.linear (target)
@@ -548,33 +688,41 @@ feature {NONE} -- Agents and support (actions)
 
 feature -- Action sequences
 
-	pointer_button_press_actions: EV_POINTER_BUTTON_ACTION_SEQUENCE
-			-- Actions to be performed when screen pointer button is pressed.
-			-- Defined here as place-holder to be undefined (i.e. joined) to
-			-- the version from {EV_WIDGET} or {EV_MODEL}.
-			-- See index clause for information on pick-and-put.
-		deferred
-		end
+--	pointer_button_press_actions: EV_POINTER_BUTTON_ACTION_SEQUENCE
+--			-- Actions to be performed when screen pointer button is pressed.
+--			-- Defined here as place-holder to be undefined (i.e. joined) to
+--			-- the version from {EV_WIDGET} or {EV_MODEL}.
+--			-- See index clause for information on pick-and-put.
+--		deferred
+--		end
 
-	pointer_motion_actions: EV_POINTER_MOTION_ACTION_SEQUENCE
-			-- Actions to be performed when screen pointer moves.
-			-- Defined here as place-holder to be undefined (i.e. joined) to
-			-- the version from {EV_WIDGET} or {EV_MODEL}.
-			-- See index clause for information on pick-and-put.
-		deferred
-		end
+--	pointer_button_release_actions: EV_POINTER_BUTTON_ACTION_SEQUENCE
+--			-- Actions to be performed when screen pointer button is pressed.
+--			-- Defined here as place-holder to be undefined (i.e. joined) to
+--			-- the version from {EV_WIDGET} or {EV_MODEL}.
+--			-- See index clause for information on pick-and-put.
+--		deferred
+--		end
 
-	pick_actions: EV_PND_START_ACTION_SEQUENCE
-			-- Actions to be performed when `pebble' is picked up.
-			-- Defined here as place-holder to be undefined by some
-			-- {EV_WIDGET} or {EV_MODEL}.
-		deferred
-		end
+--	pointer_motion_actions: EV_POINTER_MOTION_ACTION_SEQUENCE
+--			-- Actions to be performed when screen pointer moves.
+--			-- Defined here as place-holder to be undefined (i.e. joined) to
+--			-- the version from {EV_WIDGET} or {EV_MODEL}.
+--			-- See index clause for information on pick-and-put.
+--		deferred
+--		end
 
-	drop_actions: EV_PND_ACTION_SEQUENCE	--EV_PND_START_ACTION_SEQUENCE
-			-- Actions to be performed when a pebble is dropped here.
-		deferred
-		end
+--	pick_actions: EV_PND_START_ACTION_SEQUENCE
+--			-- Actions to be performed when `pebble' is picked up.
+--			-- Defined here as place-holder to be undefined by some
+--			-- {EV_WIDGET} or {EV_MODEL}.
+--		deferred
+--		end
+
+--	drop_actions: EV_PND_ACTION_SEQUENCE	--EV_PND_START_ACTION_SEQUENCE
+--			-- Actions to be performed when a pebble is dropped here.
+--		deferred
+--		end
 
 feature {NONE} -- Implementation
 
